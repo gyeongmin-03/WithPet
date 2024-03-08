@@ -18,8 +18,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.akj.withpet.apiService.AnimalApiOutput
 import com.akj.withpet.apiService.MyViewModel
+import com.akj.withpet.mainView.PetList
+import com.akj.withpet.mainView.PetMap
 
 const val PetMap = "PetMap"
 const val PetList = "PetList"
@@ -76,15 +77,6 @@ fun BottomNavigation(navController: NavHostController){
     }
 }
 
-
-
-
-@Composable
-fun descriptionComponent(docItem: AnimalApiOutput){
-    Text(docItem.kindCd)    //품종
-    Text(docItem.age)   //나이
-    Text(docItem.sexCd)   //성별
-}
 
 
 @Composable

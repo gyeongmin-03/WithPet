@@ -62,6 +62,7 @@ import coil.compose.AsyncImage
 import com.akj.withpet.apiService.AnimalApiOutput
 import com.akj.withpet.apiService.MyViewModel
 import com.akj.withpet.apiService.PlaceApiOutput
+import com.akj.withpet.mainView.PagerCard
 import com.akj.withpet.ui.theme.WithPetTheme
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
@@ -104,154 +105,6 @@ fun MainScreenView(viewModel: MyViewModel){
 
 
 
-@OptIn(ExperimentalNaverMapApi::class)
-@Composable
-fun PetMap(viewModel: MyViewModel) {
-    val mapProperties by remember {
-        mutableStateOf(
-            MapProperties(
-                maxZoom = 17.0,
-                minZoom = 6.0,
-                locationTrackingMode = LocationTrackingMode.Follow,
-            )
-        )
-    }
-    val mapUiSettings by remember {
-        mutableStateOf(
-            MapUiSettings(isLocationButtonEnabled = true)
-        )
-    }
-
-    var markerVisibility by remember { mutableStateOf(true) }
-    var cameraPositionState = rememberCameraPositionState().coveringRegion  //이 지역에서 다시 검색을 사용할 때 유용할듯
-    val isMoving =  rememberCameraPositionState().isMoving
-
-    Box(Modifier.fillMaxSize()) {
-        NaverMap(
-            properties = mapProperties,
-            uiSettings = mapUiSettings,
-            locationSource = rememberFusedLocationSource(isCompassEnabled = true)
-        ){
-            if(!isMoving){
-                viewModel.getPlaceApiData().value?.forEach {place ->
-                    val positionN = place.coordinates.split(", ")[0].substring(startIndex = 1).toDouble()
-                    val positionE = place.coordinates.split(", ")[1].substring(startIndex = 1).toDouble()
-                    Marker(
-                        state = MarkerState(position = LatLng(positionN, positionE))
-                    )
-                }
-            }
-
-        }
-    }
-}
-
-
-@Composable
-fun PetList(viewModel: MyViewModel){
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val doc by remember { viewModel.getPlaceApiData() }
-    var text by remember {
-        mutableStateOf("")
-    }
-    var searchText by remember {
-        mutableStateOf("")
-    }
-    var isDropDown1 by remember { mutableStateOf(false) }
-    var isDropDown2 by remember { mutableStateOf(false) }
-    var choiceRegion1 by remember { mutableStateOf(REGION_ALL)}
-    var choiceRegion2 by remember { mutableStateOf(REGION_ALL)}
-
-    if(doc == null){
-        Text("Document is null")
-    } else {
-        Column {
-            Row {
-                Button(onClick = { isDropDown1 = true }) {
-                    Text(
-                        text = EmptyToAll(choiceRegion1)
-                    )
-                }
-                Button(onClick = { isDropDown2 = true }) {
-                    Text(
-                        text = EmptyToAll(choiceRegion2)
-                    )
-                }
-
-                TextField(
-                    value = text,
-                    onValueChange = {text = it},
-                    placeholder = {
-                        Text("검색")
-                    },
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = {
-                            keyboardController?.hide()
-                            searchText = text
-                        }
-                    )
-                )
-            }
-
-            LazyColumn{
-                itemsIndexed(
-                    items = doc!!.filter {
-                        searchText in it.title
-                        choiceRegion1 in it.address
-                        choiceRegion2 in it.address
-                                         },
-                ){_, item: PlaceApiOutput ->
-                    ListBox(item)
-                }
-            }
-        }
-    }
-
-    DropdownMenu(
-        expanded = isDropDown1,
-        onDismissRequest = { isDropDown1 = false }
-    ) {
-        regionName.forEach {
-            DropdownMenuItem(onClick = { choiceRegion1 = it }) {
-                Text(EmptyToAll(it))
-            }
-        }
-    }
-
-
-    DropdownMenu(
-        expanded = isDropDown2,
-        onDismissRequest = { isDropDown2 = false }
-    ) {
-        region[choiceRegion1]!!.forEach {
-            DropdownMenuItem(onClick = { choiceRegion2 = it }) {
-                Text(EmptyToAll(it))
-            }
-        }
-    }
-}
-
-
-@Composable
-fun ListBox(item: PlaceApiOutput){
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-            .height(100.dp),
-        border = BorderStroke(width = 1.dp, color = Color.Black)
-    ){
-        Text("""
-            이름 : ${item.title}
-            카테고리1 : ${item.category1}
-            카테고리2 : ${item.category2}
-            시설 정보 : ${item.description}
-            전화번호 : ${item.tel}
-            주소 : ${item.address}
-            url : ${item.url}
-        """.trimIndent())
-    }
-}
 
 
 
@@ -288,43 +141,6 @@ fun PetCard(viewModel: MyViewModel){
         }
     }
 }
-
-@Composable
-fun PagerCard(docItem : AnimalApiOutput){
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(vertical = 100.dp, horizontal = 20.dp)
-            .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(20.dp))
-
-    ) {
-        Column {
-            ImageComponent(docItem.popfile)
-            descriptionComponent(docItem)
-        }
-    }
-}
-
-
-@Composable
-fun ImageComponent(imageUrl : String) {
-    AsyncImage(
-        model = imageUrl,
-        contentDescription = null,
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(20.dp)),
-        contentScale = ContentScale.Crop
-        )
-//    Image(
-//        painter = rememberAsyncImagePainter(imageUrl),
-//        contentDescription = null,
-//        modifier = Modifier.fillMaxSize()
-//    )
-}
-
 
 
 @Preview(showBackground = true)
