@@ -1,6 +1,5 @@
-package com.akj.withpet
+package com.akj.withpet.apiService
 
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup

@@ -1,4 +1,4 @@
-package com.akj.withpet
+package com.akj.withpet.apiService
 
 class PlaceApiOutput(
     val title : String,
