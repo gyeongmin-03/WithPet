@@ -11,6 +11,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,12 +25,18 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Button
 import androidx.compose.material.Card
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,8 +46,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,6 +59,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import com.akj.withpet.apiService.AnimalApiOutput
+import com.akj.withpet.apiService.MyViewModel
+import com.akj.withpet.apiService.PlaceApiOutput
 import com.akj.withpet.ui.theme.WithPetTheme
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
@@ -95,7 +107,7 @@ fun MainScreenView(viewModel: MyViewModel){
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
 fun PetMap(viewModel: MyViewModel) {
-    var mapProperties by remember {
+    val mapProperties by remember {
         mutableStateOf(
             MapProperties(
                 maxZoom = 17.0,
@@ -104,7 +116,7 @@ fun PetMap(viewModel: MyViewModel) {
             )
         )
     }
-    var mapUiSettings by remember {
+    val mapUiSettings by remember {
         mutableStateOf(
             MapUiSettings(isLocationButtonEnabled = true)
         )
@@ -137,20 +149,88 @@ fun PetMap(viewModel: MyViewModel) {
 
 @Composable
 fun PetList(viewModel: MyViewModel){
-    var doc by remember { viewModel.getPlaceApiData() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val doc by remember { viewModel.getPlaceApiData() }
+    var text by remember {
+        mutableStateOf("")
+    }
+    var searchText by remember {
+        mutableStateOf("")
+    }
+    var isDropDown1 by remember { mutableStateOf(false) }
+    var isDropDown2 by remember { mutableStateOf(false) }
+    var choiceRegion1 by remember { mutableStateOf(REGION_ALL)}
+    var choiceRegion2 by remember { mutableStateOf(REGION_ALL)}
 
     if(doc == null){
         Text("Document is null")
     } else {
-        LazyColumn{
-            itemsIndexed(
-                items = doc!!,
-            ){_, item: PlaceApiOutput ->
-                ListBox(item)
+        Column {
+            Row {
+                Button(onClick = { isDropDown1 = true }) {
+                    Text(
+                        text = EmptyToAll(choiceRegion1)
+                    )
+                }
+                Button(onClick = { isDropDown2 = true }) {
+                    Text(
+                        text = EmptyToAll(choiceRegion2)
+                    )
+                }
+
+                TextField(
+                    value = text,
+                    onValueChange = {text = it},
+                    placeholder = {
+                        Text("검색")
+                    },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = {
+                            keyboardController?.hide()
+                            searchText = text
+                        }
+                    )
+                )
+            }
+
+            LazyColumn{
+                itemsIndexed(
+                    items = doc!!.filter {
+                        searchText in it.title
+                        choiceRegion1 in it.address
+                        choiceRegion2 in it.address
+                                         },
+                ){_, item: PlaceApiOutput ->
+                    ListBox(item)
+                }
+            }
+        }
+    }
+
+    DropdownMenu(
+        expanded = isDropDown1,
+        onDismissRequest = { isDropDown1 = false }
+    ) {
+        regionName.forEach {
+            DropdownMenuItem(onClick = { choiceRegion1 = it }) {
+                Text(EmptyToAll(it))
+            }
+        }
+    }
+
+
+    DropdownMenu(
+        expanded = isDropDown2,
+        onDismissRequest = { isDropDown2 = false }
+    ) {
+        region[choiceRegion1]!!.forEach {
+            DropdownMenuItem(onClick = { choiceRegion2 = it }) {
+                Text(EmptyToAll(it))
             }
         }
     }
 }
+
 
 @Composable
 fun ListBox(item: PlaceApiOutput){
@@ -179,7 +259,6 @@ fun ListBox(item: PlaceApiOutput){
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PetCard(viewModel: MyViewModel){
-    var repeat = 3
     var doc by remember { viewModel.getPetApiData() }
     val pagerState = rememberPagerState(
         initialPage = Int.MAX_VALUE / 2,
@@ -195,11 +274,6 @@ fun PetCard(viewModel: MyViewModel){
 
     if(doc == null){
         Text("Document is null")
-        repeat--
-        if(repeat > 0){
-            viewModel.loadPetApiData()
-            doc = viewModel.getPetApiData().value
-        }
     } else {
         HorizontalPager(
             state = pagerState,
@@ -252,73 +326,6 @@ fun ImageComponent(imageUrl : String) {
 }
 
 
-@Composable
-fun descriptionComponent(docItem: AnimalApiOutput){
-    Text(docItem.kindCd)    //품종
-    Text(docItem.age)   //나이
-    Text(docItem.sexCd)   //성별
-}
-
-
-@Composable
-fun NavigationGraph(navController: NavHostController, viewModel: MyViewModel){
-    NavHost(navController = navController, startDestination = BottomNavItem.Card.screenRoute){
-        composable(BottomNavItem.Map.screenRoute){
-            PetMap(viewModel)
-        }
-        composable(BottomNavItem.Card.screenRoute){
-            PetCard(viewModel)
-        }
-        composable(BottomNavItem.List.screenRoute){
-            PetList(viewModel)
-        }
-    }
-}
-
-
-@Composable
-fun BottomNavigation(navController: NavHostController){
-    val items = listOf<BottomNavItem>(
-        BottomNavItem.Map,
-        BottomNavItem.Card,
-        BottomNavItem.List
-    )
-
-    androidx.compose.material.BottomNavigation {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
-
-        items.forEach{ item ->
-            BottomNavigationItem(
-                icon = {
-                       Icon(
-                           painter = painterResource(id = item.icon),
-                           contentDescription = stringResource(id = item.title),
-                           modifier = Modifier
-                               .width(26.dp)
-                               .height(26.dp)
-                       )
-                },
-                label = { Text(stringResource(id = item.title), fontSize = 9.sp) },
-                selected = currentRoute == item.screenRoute,
-                alwaysShowLabel = false,
-                onClick = {
-                      navController.navigate(item.screenRoute){
-                          navController.graph.startDestinationRoute?.let{
-                              popUpTo(it) { saveState = true }
-                          }
-                          launchSingleTop = true
-                          restoreState = true
-                      }
-                },
-                selectedContentColor = MaterialTheme.colors.primary,
-                unselectedContentColor = Color.Gray
-            )
-        }
-    }
-}
-
-
 
 @Preview(showBackground = true)
 @Composable
@@ -340,6 +347,6 @@ fun GreetingPreview() {
     )
 
     MaterialTheme{
-//        PagerCard(item2)
+        PagerCard(item2)
     }
 }
