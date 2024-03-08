@@ -109,39 +109,6 @@ fun MainScreenView(viewModel: MyViewModel){
 
 
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun PetCard(viewModel: MyViewModel){
-    var doc by remember { viewModel.getPetApiData() }
-    val pagerState = rememberPagerState(
-        initialPage = Int.MAX_VALUE / 2,
-        initialPageOffsetFraction = 0.0f,
-        pageCount = {Int.MAX_VALUE}
-    )
-
-    val fling = PagerDefaults.flingBehavior(
-        state = pagerState,
-        decayAnimationSpec = rememberSplineBasedDecay(),
-        snapAnimationSpec = tween(durationMillis = 300)
-    )
-
-    if(doc == null){
-        Text("Document is null")
-    } else {
-        HorizontalPager(
-            state = pagerState,
-            contentPadding = PaddingValues(start = 32.dp, end = 32.dp),
-//            pageSize = PageSize.Fixed(pageSize = 100.dp),
-            outOfBoundsPageCount = 1,
-//            pageSpacing = pageSpacing,
-//            flingBehavior = fling,
-//            snapPosition = snapPosition
-        ) {page : Int ->
-            PagerCard(doc!![page % doc!!.size])
-        }
-    }
-}
-
 
 @Preview(showBackground = true)
 @Composable
