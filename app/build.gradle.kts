@@ -61,9 +61,9 @@ dependencies {
     implementation("androidx.compose.material:material")
     implementation("io.github.fornewid:naver-map-compose:1.6.0")
     implementation("io.github.fornewid:naver-map-location:21.0.1")
-    implementation("androidx.compose.foundation:foundation:1.6.2")
+    implementation("androidx.compose.foundation:foundation:1.6.3")
     implementation ("io.coil-kt:coil-compose:2.6.0")
-    implementation ("androidx.compose.animation:animation:1.6.2")
+    implementation ("androidx.compose.animation:animation:1.6.3")
     implementation ("org.jsoup:jsoup:1.17.2")
     implementation ("androidx.navigation:navigation-compose:2.7.7")
 
