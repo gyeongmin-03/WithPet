@@ -1,8 +1,10 @@
 package com.akj.withpet.mainView
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -23,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -39,23 +42,30 @@ import com.akj.withpet.regionName
 
 @Composable
 fun PetList(viewModel: MyViewModel){
-    val dropdownModifier = Modifier.width(110.dp).heightIn(max=300.dp)
+    val dropdownModifier = Modifier
+        .width(110.dp)
+        .heightIn(max = 300.dp)
     val keyboardController = LocalSoftwareKeyboardController.current
-    val doc by remember { viewModel.getPlaceApiData() }
-    var text by remember {
-        mutableStateOf("")
-    }
-    var searchText by remember {
-        mutableStateOf("")
-    }
+
+    val doc1 = viewModel.getPlaceApiData1().value
+    val doc2 = viewModel.getPlaceApiData2().value
+    val doc3 = viewModel.getPlaceApiData3().value
+//    val doc2 by remember {viewModel.getPlaceApiData2()}
+//    val doc3 by remember {viewModel.getPlaceApiData3()}
+
+    var text by remember {mutableStateOf("")}
+    var searchText by remember {mutableStateOf("")}
+
     var isDropDown1 by remember { mutableStateOf(false) }
     var isDropDown2 by remember { mutableStateOf(false) }
     var choiceRegion1 by remember { mutableStateOf(REGION_ALL) }
     var choiceRegion2 by remember { mutableStateOf(REGION_ALL) }
 
-    if(doc == null){
+
+    if(doc1 == null || doc2 == null || doc3 == null){
         Text("Document is null")
     } else {
+        val doc = doc1 + doc2 + doc3
         Column {
             Row {
                 Button(onClick = { isDropDown1 = true }, modifier = Modifier.width(110.dp)) {

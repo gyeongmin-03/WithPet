@@ -13,6 +13,7 @@ object ApiService {
             try {
                 val urlBuilder = StringBuilder("http://api.kcisa.kr/openapi/API_TOU_050/request")
                 urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=" + MyServiceKey.getPlaceServiceKey())
+//                urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("100", "UTF-8"))
                 urlBuilder.append("&" + URLEncoder.encode("pageNo", "UTF-8") + "=" + URLEncoder.encode(pageNo.toString(), "UTF-8"))
                 urlBuilder.append("&" + URLEncoder.encode("keyword", "UTF-8") + "=" + URLEncoder.encode(keyword, "UTF-8"))
 

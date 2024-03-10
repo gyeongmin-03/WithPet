@@ -45,22 +45,30 @@ fun PetMap(viewModel: MyViewModel) {
         )
     }
 
+    val doc1 = viewModel.getPlaceApiData1().value
+    val doc2 = viewModel.getPlaceApiData2().value
+    val doc3 = viewModel.getPlaceApiData3().value
     Box(Modifier.fillMaxSize()) {
-        NaverMap(
-            properties = mapProperties,
-            uiSettings = mapUiSettings,
-            locationSource = rememberFusedLocationSource(isCompassEnabled = true)
-        ){
-            viewModel.getPlaceApiData().value?.forEach {place ->
-                val positionN = place.coordinates.split(", ")[0].substring(startIndex = 1).toDouble()
-                val positionE = place.coordinates.split(", ")[1].substring(startIndex = 1).toDouble()
-                Marker(
-                    state = MarkerState(position = LatLng(positionN, positionE)),
-                    minZoom = 10.0,
-                    captionText = place.title,
-                    captionMinZoom = 10.0
-                )
+        if(doc1 != null && doc2 != null && doc3 != null){
+            NaverMap(
+                properties = mapProperties,
+                uiSettings = mapUiSettings,
+                locationSource = rememberFusedLocationSource(isCompassEnabled = true)
+            ){
+                val doc = doc1 + doc2 + doc3
+                doc.forEach {place ->
+                    val positionN = place.coordinates.split(", ")[0].substring(startIndex = 1).toDouble()
+                    val positionE = place.coordinates.split(", ")[1].substring(startIndex = 1).toDouble()
+                    Marker(
+                        state = MarkerState(position = LatLng(positionN, positionE)),
+                        minZoom = 12.0,
+                        captionText = place.title,
+                        captionMinZoom = 12.0
+                    )
+                }
             }
+        }else {
+            Text("데이터 로딩 중")
         }
     }
 }
