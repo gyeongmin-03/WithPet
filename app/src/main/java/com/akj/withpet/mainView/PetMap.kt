@@ -1,5 +1,6 @@
 package com.akj.withpet.mainView
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -40,6 +41,8 @@ fun PetMap(viewModel: MyViewModel) {
 
     var markerVisibility by remember { mutableStateOf(true) }
     var cameraPositionState = rememberCameraPositionState().coveringRegion  //이 지역에서 다시 검색을 사용할 때 유용할듯
+    Log.d("테스트", cameraPositionState.toString())
+
     val isMoving =  rememberCameraPositionState().isMoving
 
     Box(Modifier.fillMaxSize()) {

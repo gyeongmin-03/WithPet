@@ -1,12 +1,12 @@
 package com.akj.withpet.apiService
 
 class PlaceApiOutput(
-    val title : String,
-    val category1 : String,
-    val category2 : String,
-    val description : String,
-    val tel : String,
-    val address : String,
+    val title : String, //이름
+    val category1 : String, //카테고리1
+    val category2 : String, //카테고리2
+    val description : String,   //시설 정보
+    val tel : String,   //전화번호
+    val address : String,   //주소
     val url : String,
     val coordinates : String    //좌표
 ) {
