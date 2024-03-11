@@ -32,6 +32,7 @@ class MainActivity : ComponentActivity() {
             WithPetTheme {
                 MainScreenView(viewModel)
             }
+            //테스트
         }
     }
 }
