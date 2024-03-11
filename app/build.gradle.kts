@@ -66,6 +66,7 @@ dependencies {
     implementation ("androidx.compose.animation:animation:1.6.3")
     implementation ("org.jsoup:jsoup:1.17.2")
     implementation ("androidx.navigation:navigation-compose:2.7.7")
+    implementation ("com.opencsv:opencsv:5.7.1")
 
 
     testImplementation("junit:junit:4.13.2")

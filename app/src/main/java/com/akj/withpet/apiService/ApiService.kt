@@ -8,60 +8,6 @@ import java.net.URL
 import java.net.URLEncoder
 
 object ApiService {
-    suspend fun getPlace(pageNo: Int = 1, keyword: String = ""): List<PlaceApiOutput>? {
-        return withContext(Dispatchers.IO) {
-            try {
-                val urlBuilder = StringBuilder("http://api.kcisa.kr/openapi/API_TOU_050/request")
-                urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=" + MyServiceKey.getPlaceServiceKey())
-//                urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("100", "UTF-8"))
-                urlBuilder.append("&" + URLEncoder.encode("pageNo", "UTF-8") + "=" + URLEncoder.encode(pageNo.toString(), "UTF-8"))
-                urlBuilder.append("&" + URLEncoder.encode("keyword", "UTF-8") + "=" + URLEncoder.encode(keyword, "UTF-8"))
-
-                val responseBody: String
-                with(URL(urlBuilder.toString()).openConnection() as HttpURLConnection) {
-                    requestMethod = "GET"
-                    println("Response code: $responseCode")
-
-                    responseBody = if (responseCode in 200..299) {
-                        inputStream.bufferedReader().use { it.readText() }
-                    } else {
-                        errorStream.bufferedReader().use { it.readText() }
-                    }
-
-                    disconnect()
-                }
-
-                val document = Jsoup.parse(responseBody)
-
-                if (document.select("resultcode").text() == "0000") {
-                    val itemsList = mutableListOf<PlaceApiOutput>()
-                    val items = document.select("item")
-                    for (item in items) {
-                        val title = item.select("title").text()
-                        val category1 = item.select("category1").text()
-                        val category2 = item.select("category2").text()
-                        val description = item.select("description").text()
-                        val tel = item.select("tel").text()
-                        val address = item.select("address").text()
-                        val url = item.select("url").text()
-                        val coordinates = item.select("coordinates").text()
-
-                        if ("반려동물 동반불가" !in description) {
-                            itemsList.add(PlaceApiOutput(title, category1, category2, description, tel, address, url, coordinates))
-                        }
-                    }
-                    itemsList.toList()
-                } else {
-                    null
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            }
-        }
-    }
-
-
     suspend fun getAnimal() : List<AnimalApiOutput>? {
         return withContext(Dispatchers.IO){
             try {

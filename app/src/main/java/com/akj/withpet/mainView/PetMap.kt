@@ -64,7 +64,7 @@ fun PetMap(viewModel: MyViewModel) {
                         minZoom = 12.0,
                         captionText = place.title,
                         captionMinZoom = 12.0
-                    )
+                    )   //마커를 리스트에 저장하고, 가져오는 방식을 고려해야함. 로딩할 때마다 다운로드하고 있음
                 }
             }
         }else {

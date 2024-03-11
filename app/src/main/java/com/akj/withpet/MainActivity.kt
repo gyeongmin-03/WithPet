@@ -16,15 +16,17 @@ import com.akj.withpet.apiService.MyViewModel
 import com.akj.withpet.apiService.PlaceApiOutput
 import com.akj.withpet.mainView.PagerCard
 import com.akj.withpet.ui.theme.WithPetTheme
+import com.opencsv.CSVReader
+import java.io.InputStreamReader
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         val viewModel = MyViewModel()
-        viewModel.loadPetApiData()
-        viewModel.loadPlaceApiData1()
-        viewModel.loadPlaceApiData2()
-        viewModel.loadPlaceApiData3()
+        val assetManager = this.assets
+        val inputStream = assetManager.open("placeCSV.CSV")
+        val reader = CSVReader(InputStreamReader(inputStream))
 
         setContent {
             WithPetTheme {
