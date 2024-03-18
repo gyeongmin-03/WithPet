@@ -1,5 +1,6 @@
 package com.akj.withpet
 
+import android.content.res.AssetManager
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.BottomNavigationItem
@@ -19,6 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.akj.withpet.apiService.MyViewModel
+import com.akj.withpet.apiService.PlaceApiOutput
 import com.akj.withpet.mainView.PetCard
 import com.akj.withpet.mainView.PetList
 import com.akj.withpet.mainView.PetMap
@@ -81,16 +83,16 @@ fun BottomNavigation(navController: NavHostController){
 
 
 @Composable
-fun NavigationGraph(navController: NavHostController, viewModel: MyViewModel){
+fun NavigationGraph(navController: NavHostController){
     NavHost(navController = navController, startDestination = BottomNavItem.Card.screenRoute){
         composable(BottomNavItem.Map.screenRoute){
-            PetMap(viewModel)
+            PetMap()
         }
         composable(BottomNavItem.Card.screenRoute){
-            PetCard(viewModel)
+            PetCard()
         }
         composable(BottomNavItem.List.screenRoute){
-            PetList(viewModel)
+            PetList()
         }
     }
 }

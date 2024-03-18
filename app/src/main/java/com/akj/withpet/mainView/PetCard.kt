@@ -32,7 +32,8 @@ import com.akj.withpet.apiService.MyViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun PetCard(viewModel: MyViewModel){
+fun PetCard(){
+    val viewModel = MyViewModel
     var doc by remember { viewModel.getPetApiData() }
     val pagerState = rememberPagerState(
         initialPage = Int.MAX_VALUE / 2,

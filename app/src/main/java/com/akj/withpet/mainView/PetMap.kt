@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.akj.withpet.apiService.MyViewModel
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.compose.CameraPositionState
@@ -26,10 +27,11 @@ import com.naver.maps.map.compose.MarkerState
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.rememberCameraPositionState
 import com.naver.maps.map.compose.rememberFusedLocationSource
+import org.apache.commons.lang3.math.NumberUtils.toDouble
 
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
-fun PetMap(viewModel: MyViewModel) {
+fun PetMap() {
     val mapProperties by remember {
         mutableStateOf(
             MapProperties(
@@ -44,31 +46,24 @@ fun PetMap(viewModel: MyViewModel) {
             MapUiSettings(isLocationButtonEnabled = true)
         )
     }
+    val placeList = MyViewModel.getPlaceApiData().value!!
 
-    val doc1 = viewModel.getPlaceApiData1().value
-    val doc2 = viewModel.getPlaceApiData2().value
-    val doc3 = viewModel.getPlaceApiData3().value
     Box(Modifier.fillMaxSize()) {
-        if(doc1 != null && doc2 != null && doc3 != null){
-            NaverMap(
-                properties = mapProperties,
-                uiSettings = mapUiSettings,
-                locationSource = rememberFusedLocationSource(isCompassEnabled = true)
-            ){
-                val doc = doc1 + doc2 + doc3
-                doc.forEach {place ->
-                    val positionN = place.coordinates.split(", ")[0].substring(startIndex = 1).toDouble()
-                    val positionE = place.coordinates.split(", ")[1].substring(startIndex = 1).toDouble()
-                    Marker(
-                        state = MarkerState(position = LatLng(positionN, positionE)),
-                        minZoom = 12.0,
-                        captionText = place.title,
-                        captionMinZoom = 12.0
-                    )   //마커를 리스트에 저장하고, 가져오는 방식을 고려해야함. 로딩할 때마다 다운로드하고 있음
-                }
+        NaverMap(
+            properties = mapProperties,
+            uiSettings = mapUiSettings,
+            locationSource = rememberFusedLocationSource(isCompassEnabled = true)
+        ){
+            placeList.forEach {place ->
+                val positionN = place.latitude.toDouble()
+                val positionE = place.longitude.toDouble()
+                Marker(
+                    state = MarkerState(position = LatLng(positionN, positionE)),
+                    minZoom = 12.0,
+                    captionText = place.title,
+                    captionMinZoom = 12.0
+                )   //마커를 리스트에 저장하고, 가져오는 방식을 고려해야함. 로딩할 때마다 다운로드하고 있음
             }
-        }else {
-            Text("데이터 로딩 중")
         }
     }
 }

@@ -1,16 +1,20 @@
 package com.akj.withpet.apiService
 
-class PlaceApiOutput(
-    val title : String, //이름
-    val category1 : String, //카테고리1
-    val category2 : String, //카테고리2
-    val description : String,   //시설 정보
-    val tel : String,   //전화번호
-    val address : String,   //주소
-    val url : String,
-    val coordinates : String    //좌표
-) {
-
+class PlaceApiOutput(data : Array<String>) {
+    val title : String = data[0] //시설명
+    val description : String = data[1]   //시설 정보
+    val latitude : String = data[2]    //위도
+    val longitude : String = data[3] //경도
+    val address : String = data[4]   //주소
+    val tel : String = data[5]   //전화번호
+    val homepage : String = data[6] //홈페이지
+    val closedDay : String = data[7] //휴무일
+    val operatingTime : String = data[8] //운영시간
+    val parking : String = data[9] //주차가능 여부
+    val sizeAble : String = data[10]  //입장 가능 동물 크기
+    val limit : String = data[11] //제한 사항,
+    val insideAble : String = data[12] // 실내 가능 여부
+    val outsudeAble : String = data[13] //실외 가능 여부
 }
 
 class AnimalApiOutput(

@@ -1,5 +1,7 @@
 package com.akj.withpet.mainView
 
+import android.content.res.AssetManager
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,25 +35,24 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.akj.withpet.EmptyToAll
+import com.akj.withpet.MainActivity
 import com.akj.withpet.REGION_ALL
 import com.akj.withpet.apiService.MyViewModel
 import com.akj.withpet.apiService.PlaceApiOutput
 import com.akj.withpet.region
 import com.akj.withpet.regionName
+import com.opencsv.CSVReader
+import java.io.InputStreamReader
+import java.util.Arrays
 
 
 @Composable
-fun PetList(viewModel: MyViewModel){
+fun PetList(){
     val dropdownModifier = Modifier
         .width(110.dp)
         .heightIn(max = 300.dp)
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    val doc1 = viewModel.getPlaceApiData1().value
-    val doc2 = viewModel.getPlaceApiData2().value
-    val doc3 = viewModel.getPlaceApiData3().value
-//    val doc2 by remember {viewModel.getPlaceApiData2()}
-//    val doc3 by remember {viewModel.getPlaceApiData3()}
 
     var text by remember {mutableStateOf("")}
     var searchText by remember {mutableStateOf("")}
@@ -61,78 +62,75 @@ fun PetList(viewModel: MyViewModel){
     var choiceRegion1 by remember { mutableStateOf(REGION_ALL) }
     var choiceRegion2 by remember { mutableStateOf(REGION_ALL) }
 
+    val placeList = MyViewModel.getPlaceApiData().value!!
 
-    if(doc1 == null || doc2 == null || doc3 == null){
-        Text("Document is null")
-    } else {
-        val doc = doc1 + doc2 + doc3
-        Column {
-            Row {
-                Button(onClick = { isDropDown1 = true }, modifier = Modifier.width(110.dp)) {
-                    Text(
-                        text = EmptyToAll(choiceRegion1)
-                    )
-                }
 
-                DropdownMenu(
-                    expanded = isDropDown1,
-                    onDismissRequest = { isDropDown1 = false },
-                    modifier = dropdownModifier
-                ) {
-                    regionName.forEach {
-                        DropdownMenuItem(onClick = {
-                            choiceRegion1 = it
-                            choiceRegion2 = REGION_ALL
-                        }) {
-                            Text(EmptyToAll(it))
-                        }
-                    }
-                }
-
-                Button(onClick = { isDropDown2 = true }, modifier = Modifier.width(110.dp)) {
-                    Text(
-                        text = EmptyToAll(choiceRegion2)
-                    )
-                }
-
-                DropdownMenu(
-                    expanded = isDropDown2,
-                    onDismissRequest = { isDropDown2 = false },
-                    modifier = dropdownModifier,
-                    offset = DpOffset(x = 105.dp, y = 0.dp)
-                ) {
-                    region[choiceRegion1]!!.forEach {
-                        DropdownMenuItem(onClick = { choiceRegion2 = it }) {
-                            Text(EmptyToAll(it))
-                        }
-                    }
-                }
-
-                TextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    placeholder = {
-                        Text("검색")
-                    },
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = {
-                        keyboardController?.hide()
-                        searchText = text
-                    }
-                    )
+    Column {
+        Row {
+            Button(onClick = { isDropDown1 = true }, modifier = Modifier.width(110.dp)) {
+                Text(
+                    text = EmptyToAll(choiceRegion1)
                 )
             }
 
-            LazyColumn {
-                itemsIndexed(
-                    items = doc!!.filter {
-                        searchText in it.title &&
-                                choiceRegion1 in it.address.split(" ")[1] &&
-                                choiceRegion2 in it.address.split(" ")[2]
-                    },
-                ) { _, item: PlaceApiOutput ->
-                    ListBox(item)
+            DropdownMenu(
+                expanded = isDropDown1,
+                onDismissRequest = { isDropDown1 = false },
+                modifier = dropdownModifier
+            ) {
+                regionName.forEach {
+                    DropdownMenuItem(onClick = {
+                        choiceRegion1 = it
+                        choiceRegion2 = REGION_ALL
+                    }) {
+                        Text(EmptyToAll(it))
+                    }
                 }
+            }
+
+            Button(onClick = { isDropDown2 = true }, modifier = Modifier.width(110.dp)) {
+                Text(
+                    text = EmptyToAll(choiceRegion2)
+                )
+            }
+
+            DropdownMenu(
+                expanded = isDropDown2,
+                onDismissRequest = { isDropDown2 = false },
+                modifier = dropdownModifier,
+                offset = DpOffset(x = 105.dp, y = 0.dp)
+            ) {
+                region[choiceRegion1]!!.forEach {
+                    DropdownMenuItem(onClick = { choiceRegion2 = it }) {
+                        Text(EmptyToAll(it))
+                    }
+                }
+            }
+
+            TextField(
+                value = text,
+                onValueChange = { text = it },
+                placeholder = {
+                    Text("검색")
+                },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = {
+                    keyboardController?.hide()
+                    searchText = text
+                }
+                )
+            )
+        }
+
+        LazyColumn {
+            itemsIndexed(
+                items = placeList.filter {
+                    searchText in it.title &&
+                            choiceRegion1 in it.address.split(" ")[1] &&
+                            choiceRegion2 in it.address.split(" ")[2]
+                },
+            ) { _, item ->
+                ListBox(item)
             }
         }
     }
@@ -151,7 +149,7 @@ fun ListBox(item: PlaceApiOutput){
     ){
         Text("""
             ${item.title}
-            ${item.category1} : ${item.category2}
+            ${item.description}
             ${item.address}
         """.trimIndent())
     }

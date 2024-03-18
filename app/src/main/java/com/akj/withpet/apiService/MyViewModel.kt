@@ -8,23 +8,35 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MyViewModel : ViewModel() {
-    private val pet = mutableStateOf<List<AnimalApiOutput>?>(null)
+object MyViewModel : ViewModel() {
+    private val petList = mutableStateOf<List<AnimalApiOutput>?>(null)
+    private val placeList = mutableStateOf<List<PlaceApiOutput>?>(null)
 
-    fun loadPetApiData(){
+
+    fun setPetApiData(){
         viewModelScope.launch {
             try {
                 val result = withContext(Dispatchers.IO) {
                     ApiService.getAnimal()
                 }
-                pet.value = result
+                petList.value = result
             } catch (e: Exception) {
                 // 에러 처리
             }
         }
     }
 
-    fun getPetApiData() : MutableState<List<AnimalApiOutput>?> {
-        return pet
+    fun setPlaceApiData(new : List<PlaceApiOutput>){
+        placeList.value = new
     }
+
+    fun getPetApiData() : MutableState<List<AnimalApiOutput>?> {
+        return petList
+    }
+
+    fun getPlaceApiData() : MutableState<List<PlaceApiOutput>?>{
+        return placeList
+    }
+
+
 }
