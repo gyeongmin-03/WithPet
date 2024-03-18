@@ -44,13 +44,10 @@ object ApiService {
                     for (item in items){
                         val desertionNo = item.select("desertionNo").text() //유기 번호
                         val happenDt = item.select("happenDt").text() //접수일
-                        val happenPlace = item.select("happenPlace").text() //발견 장소
                         val kindCd = item.select("kindCd").text()   //품종
-                        val colorCd = item.select("colorCd").text() //색상
                         val age = item.select("age").text() //나이
                         val weight = item.select("weight").text() //체중
                         val popfile = item.select("popfile").text() //사진
-                        val processState = item.select("processState").text() //상태
                         val sexCd = item.select("sexCd").text() //성별
                         val neuterYn = item.select("neuterYn").text() //중성화 여부
                         val specialMark = item.select("specialMark").text() //특징
@@ -61,7 +58,7 @@ object ApiService {
                         val chargeNm = item.select("chargeNm").text() //담당자
                         val officetel = item.select("officetel").text() //담당자 연락처
 
-                        itemsList.add(AnimalApiOutput(desertionNo, happenDt, happenPlace, kindCd, colorCd, age, weight, popfile, processState, sexCd, neuterYn, specialMark, careNm, careTel, careAddr, orgNm, chargeNm, officetel))
+                        itemsList.add(AnimalApiOutput(desertionNo, happenDt, kindCd, age, weight, popfile, sexCd, neuterYn, specialMark, careNm, careTel, careAddr, orgNm, chargeNm, officetel))
                     }
                     itemsList.toList()
                 } else {

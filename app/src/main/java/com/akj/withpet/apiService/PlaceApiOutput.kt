@@ -20,13 +20,10 @@ class PlaceApiOutput(data : Array<String>) {
 class AnimalApiOutput(
     val desertionNo : String, //유기 번호
     val happenDt : String, //접수일
-    val happenPlace : String, //발견 장소
     val kindCd : String,    //품종
-    val colorCd  : String,  //색상
     val age  : String,  //나이
     val weight  : String,  //체중
     val popfile  : String,  //사진
-    val processState  : String,  //상태
     val sexCd  : String,  //성별
     val neuterYn  : String,  //중성화 여부
     val specialMark  : String,  //특징

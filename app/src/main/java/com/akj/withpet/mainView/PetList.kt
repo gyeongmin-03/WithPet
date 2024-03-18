@@ -126,8 +126,8 @@ fun PetList(){
             itemsIndexed(
                 items = placeList.filter {
                     searchText in it.title &&
-                            choiceRegion1 in it.address.split(" ")[1] &&
-                            choiceRegion2 in it.address.split(" ")[2]
+                            choiceRegion1 in it.address &&
+                            choiceRegion2 in it.address
                 },
             ) { _, item ->
                 ListBox(item)
