@@ -1,7 +1,5 @@
 package com.akj.withpet.mainView
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,23 +48,13 @@ fun PetCard(){
         pageCount = {Int.MAX_VALUE}
     )
 
-    val fling = PagerDefaults.flingBehavior(
-        state = pagerState,
-        decayAnimationSpec = rememberSplineBasedDecay(),
-        snapAnimationSpec = tween(durationMillis = 300)
-    )
-
     if(doc == null){
         Text("Document is null")
     } else {
         HorizontalPager(
             state = pagerState,
             contentPadding = PaddingValues(start = 32.dp, end = 32.dp),
-//            pageSize = PageSize.Fixed(pageSize = 100.dp),
-            outOfBoundsPageCount = 1,
-//            pageSpacing = pageSpacing,
-//            flingBehavior = fling,
-//            snapPosition = snapPosition
+//            outOfBoundsPageCount = 1
         ) {page : Int ->
             PagerCard(doc!![page % doc!!.size])
         }
@@ -129,11 +116,22 @@ fun DescriptionComponent(docItem: AnimalApiOutput){
 
 @Composable
 fun DetailAnimal(item: AnimalApiOutput){
+    val like = remember{ mutableStateOf(false)}
+
     Box(modifier = Modifier.verticalScroll(rememberScrollState())){
+        Icon(
+            painter = if(like.value) painterResource(R.drawable.ic_star_yellow) else painterResource(R.drawable.ic_star_black),
+            contentDescription = null,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .clickable {
+                    !like.value
+                }
+        )
         Icon(
             painter = painterResource(R.drawable.ic_close),
             contentDescription = null,
-            modifier = Modifier.align(Alignment.CenterEnd)
+            modifier = Modifier.align(Alignment.TopEnd)
             )
         Column {
             ImageComponent(imageUrl = item.popfile)

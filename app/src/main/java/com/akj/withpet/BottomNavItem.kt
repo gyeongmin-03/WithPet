@@ -1,6 +1,5 @@
 package com.akj.withpet
 
-import android.content.res.AssetManager
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.BottomNavigationItem
@@ -19,20 +18,18 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.akj.withpet.apiService.MyViewModel
-import com.akj.withpet.apiService.PlaceApiOutput
+import com.akj.withpet.mainView.OptionView
 import com.akj.withpet.mainView.PetCard
-import com.akj.withpet.mainView.PetList
-import com.akj.withpet.mainView.PetMap
+import com.akj.withpet.mainView.PlaceList
 
-const val PetMap = "PetMap"
+const val Option = "Option"
 const val PetList = "PetList"
 const val PetCard = "PetCard"
 
 sealed class BottomNavItem(
     val title: Int, val icon: Int, val screenRoute: String
 ){
-    object Map : BottomNavItem(R.string.text_pet_map, R.drawable.ic_map, PetMap)
+    object option : BottomNavItem(R.string.text_pet_map, R.drawable.ic_map, Option)
     object List : BottomNavItem(R.string.text_pet_list, R.drawable.ic_list, PetList)
     object Card : BottomNavItem(R.string.text_pet_card, R.drawable.ic_card, PetCard)
 }
@@ -41,7 +38,7 @@ sealed class BottomNavItem(
 @Composable
 fun BottomNavigation(navController: NavHostController){
     val items = listOf<BottomNavItem>(
-        BottomNavItem.Map,
+        BottomNavItem.option,
         BottomNavItem.Card,
         BottomNavItem.List
     )
@@ -85,14 +82,14 @@ fun BottomNavigation(navController: NavHostController){
 @Composable
 fun NavigationGraph(navController: NavHostController){
     NavHost(navController = navController, startDestination = BottomNavItem.Card.screenRoute){
-        composable(BottomNavItem.Map.screenRoute){
-            PetMap()
+        composable(BottomNavItem.option.screenRoute){
+            OptionView()
         }
         composable(BottomNavItem.Card.screenRoute){
             PetCard()
         }
         composable(BottomNavItem.List.screenRoute){
-            PetList()
+            PlaceList()
         }
     }
 }

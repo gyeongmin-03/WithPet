@@ -59,15 +59,12 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material:material")
-    implementation("io.github.fornewid:naver-map-compose:1.6.0")
-    implementation("io.github.fornewid:naver-map-location:21.0.1")
     implementation("androidx.compose.foundation:foundation:1.6.3")
     implementation ("io.coil-kt:coil-compose:2.6.0")
     implementation ("androidx.compose.animation:animation:1.6.3")
     implementation ("org.jsoup:jsoup:1.17.2")
     implementation ("androidx.navigation:navigation-compose:2.7.7")
     implementation ("com.opencsv:opencsv:5.7.1")
-
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
