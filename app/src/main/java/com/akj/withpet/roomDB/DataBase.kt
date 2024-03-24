@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 
 @Database(entities = [petEntity::class, placeEntity::class], version = 1)
+@TypeConverters(Converters::class)
 abstract class myDatabase : RoomDatabase() {
     abstract fun myDAO() : DAO
 
@@ -25,6 +27,10 @@ abstract class myDatabase : RoomDatabase() {
             }
 
             return instance
+        }
+
+        fun distroyInstance(){
+            instance = null
         }
     }
 }

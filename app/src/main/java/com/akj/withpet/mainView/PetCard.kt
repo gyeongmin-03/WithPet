@@ -79,12 +79,18 @@ fun PagerCard(docItem : AnimalApiOutput){
             DetailAnimal(docItem)
         } else {
             Column {
-                ImageComponent(docItem.popfile)
-                DescriptionComponent(docItem)
+                CardView(docItem)
             }
         }
     }
 }
+
+@Composable
+fun CardView(docItem: AnimalApiOutput){
+    ImageComponent(docItem.popfile)
+    DescriptionComponent(docItem)
+}
+
 
 
 @Composable
