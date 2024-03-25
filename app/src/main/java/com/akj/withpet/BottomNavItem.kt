@@ -19,12 +19,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.akj.withpet.mainView.OptionView
-import com.akj.withpet.mainView.PetCard
+import com.akj.withpet.mainView.PetCardView
 import com.akj.withpet.mainView.PlaceList
 
 const val Option = "Option"
 const val PetList = "PetList"
-const val PetCard = "PetCard"
+const val PetCard = "PetCardView"
 
 sealed class BottomNavItem(
     val title: Int, val icon: Int, val screenRoute: String
@@ -86,7 +86,7 @@ fun NavigationGraph(navController: NavHostController){
             OptionView()
         }
         composable(BottomNavItem.Card.screenRoute){
-            PetCard()
+            PetCardView()
         }
         composable(BottomNavItem.List.screenRoute){
             PlaceList()

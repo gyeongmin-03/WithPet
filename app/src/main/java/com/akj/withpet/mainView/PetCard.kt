@@ -1,18 +1,8 @@
 package com.akj.withpet.mainView
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -37,58 +27,60 @@ import com.akj.withpet.apiService.AnimalApiOutput
 import com.akj.withpet.apiService.MyViewModel
 
 
-@OptIn(ExperimentalFoundationApi::class)
+
 @Composable
-fun PetCard(){
+fun PetCardView(){
     val viewModel = MyViewModel
     var doc by remember { viewModel.getPetApiData() }
-    val pagerState = rememberPagerState(
-        initialPage = Int.MAX_VALUE / 2,
-        initialPageOffsetFraction = 0.0f,
-        pageCount = {Int.MAX_VALUE}
-    )
+    val clicked = remember {
+        PetCardClick.clicked
+    }
+    val petIndex = remember {
+        PetCardClick.petIndex
+    }
 
     if(doc == null){
         Text("Document is null")
     } else {
-        HorizontalPager(
-            state = pagerState,
-            contentPadding = PaddingValues(start = 32.dp, end = 32.dp),
-//            outOfBoundsPageCount = 1
-        ) {page : Int ->
-            PagerCard(doc!![page % doc!!.size])
-        }
-    }
-}
-
-
-@Composable
-fun PagerCard(docItem : AnimalApiOutput){
-    val clicked = remember { mutableStateOf(false) }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(vertical = 100.dp, horizontal = 20.dp)
-            .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(20.dp))
-            .clickable { clicked.value = true }
-
-    ) {
         if(clicked.value){
-            DetailAnimal(docItem)
-        } else {
-            Column {
-                CardView(docItem)
+            DetailAnimal(doc!![petIndex.value])
+        }
+        else{
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())){
+                for (i in 1..doc!!.size step 2){
+                    Row {
+                        PetCard(docItem = doc!![i-1],
+                            Modifier
+                                .fillMaxWidth(0.5f)
+                                .fillMaxHeight(0.5f), i)
+                        PetCard(docItem = doc!![i],
+                            Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(), i)
+                    }
+                }
             }
         }
     }
 }
 
+
 @Composable
-fun CardView(docItem: AnimalApiOutput){
-    ImageComponent(docItem.popfile)
-    DescriptionComponent(docItem)
+fun PetCard(docItem : AnimalApiOutput, modifier : Modifier = Modifier, index : Int){
+
+    Card(
+        modifier = modifier
+            .padding(20.dp)
+            .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(20.dp))
+            .clickable {
+                PetCardClick.onClicked()
+                PetCardClick.setIndex(index)
+            },
+        shape = RoundedCornerShape(20.dp),
+        elevation = 4.dp
+    ) {
+        ImageComponent(docItem.popfile)
+    }
 }
 
 
@@ -99,8 +91,7 @@ fun ImageComponent(imageUrl : String) {
         model = imageUrl,
         contentDescription = null,
         modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f)
+            .fillMaxSize()
             .clip(RoundedCornerShape(20.dp)),
         contentScale = ContentScale.Crop
     )
@@ -108,37 +99,11 @@ fun ImageComponent(imageUrl : String) {
 
 
 
-
-@Composable
-fun DescriptionComponent(docItem: AnimalApiOutput){
-    Row {
-        Column {
-            Text(docItem.kindCd)    //품종
-            Text(docItem.age)   //나이
-        }
-        Text(docItem.sexCd)   //성별
-    }
-}
-
 @Composable
 fun DetailAnimal(item: AnimalApiOutput){
     val like = remember{ mutableStateOf(false)}
 
-    Box(modifier = Modifier.verticalScroll(rememberScrollState())){
-        Icon(
-            painter = if(like.value) painterResource(R.drawable.ic_star_yellow) else painterResource(R.drawable.ic_star_black),
-            contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .clickable {
-                    !like.value
-                }
-        )
-        Icon(
-            painter = painterResource(R.drawable.ic_close),
-            contentDescription = null,
-            modifier = Modifier.align(Alignment.TopEnd)
-            )
+    Box(modifier = Modifier.verticalScroll(rememberScrollState()).fillMaxHeight().fillMaxWidth()){
         Column {
             ImageComponent(imageUrl = item.popfile)
             Text("유기번호 : ${item.desertionNo}")
@@ -156,5 +121,44 @@ fun DetailAnimal(item: AnimalApiOutput){
             Text("담당자 : ${item.chargeNm}")
             Text("담당자 연락처: ${item.officetel}")
         }
+        if(like.value){
+            Icon(
+                painter = painterResource(R.drawable.ic_star_yellow),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .clickable {
+                        like.value = !like.value
+                    }
+            )
+        }
+        else {
+            Icon(
+                painter = painterResource(R.drawable.ic_star_black),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .clickable {
+                        like.value = !like.value
+                    }
+            )
+        }
+        Icon(
+            painter = painterResource(R.drawable.ic_close),
+            contentDescription = null,
+            modifier = Modifier.align(Alignment.TopEnd).clickable{PetCardClick.offClicked()}
+        )
+    }
+}
+
+private object PetCardClick{
+    val clicked = mutableStateOf(false)
+    val petIndex = mutableStateOf(0)
+
+    fun onClicked() {clicked.value = true}
+    fun offClicked() {clicked.value = false}
+
+    fun setIndex(new : Int){
+        petIndex.value = new
     }
 }

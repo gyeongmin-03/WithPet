@@ -82,7 +82,7 @@ fun test(){
         itemsIndexed(
             items = petList
         ){_, pet ->
-            CardView(docItem = pet.animal)
+//            CardView(docItem = pet.animal)
         }
     }
 }
