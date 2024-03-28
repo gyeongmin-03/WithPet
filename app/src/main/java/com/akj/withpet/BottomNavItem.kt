@@ -20,7 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.akj.withpet.mainView.OptionView
 import com.akj.withpet.mainView.PetCardView
-import com.akj.withpet.mainView.PlaceList
+import com.akj.withpet.mainView.PlaceListView
 
 const val Option = "Option"
 const val PetList = "PetList"
@@ -89,7 +89,7 @@ fun NavigationGraph(navController: NavHostController){
             PetCardView()
         }
         composable(BottomNavItem.List.screenRoute){
-            PlaceList()
+            PlaceListView()
         }
     }
 }

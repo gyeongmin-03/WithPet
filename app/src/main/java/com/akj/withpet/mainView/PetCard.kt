@@ -47,15 +47,12 @@ fun PetCardView(){
     val clicked = remember {
         PetCardClick.clicked
     }
-    val petIndex = remember {
-        PetCardClick.petIndex
-    }
 
     if(doc == null){
         Text("Document is null")
     } else {
         if(clicked.value){
-            DetailAnimal(doc!![petIndex.value])
+            DetailAnimal()
         }
         else{
             Column(modifier = Modifier.verticalScroll(rememberScrollState())){
@@ -64,11 +61,11 @@ fun PetCardView(){
                         PetCard(docItem = doc!![i-1],
                             Modifier
                                 .fillMaxWidth(0.5f)
-                                .fillMaxHeight(0.5f), i-1)
+                                .fillMaxHeight(0.5f))
                         PetCard(docItem = doc!![i],
                             Modifier
                                 .fillMaxWidth()
-                                .fillMaxHeight(), i)
+                                .fillMaxHeight())
                     }
                 }
             }
@@ -78,15 +75,14 @@ fun PetCardView(){
 
 
 @Composable
-fun PetCard(docItem : AnimalApiOutput, modifier : Modifier = Modifier, index : Int){
-
+private fun PetCard(docItem : AnimalApiOutput, modifier : Modifier = Modifier){
     Card(
         modifier = modifier
             .padding(20.dp)
             .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(20.dp))
             .clickable {
                 PetCardClick.onClicked()
-                PetCardClick.setIndex(index)
+                PetCardClick.setIndex(docItem)
             },
         shape = RoundedCornerShape(20.dp),
         elevation = 4.dp
@@ -102,7 +98,8 @@ fun ImageComponent(imageUrl : String) {
     AsyncImage(
         model = imageUrl,
         contentDescription = null,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp)),
         contentScale = ContentScale.Fit
     )
@@ -111,10 +108,11 @@ fun ImageComponent(imageUrl : String) {
 
 
 @Composable
-fun DetailAnimal(item: AnimalApiOutput){
-    val like = remember{ mutableStateOf(false) }
+fun DetailAnimal(){
+    val item = PetCardClick.petIndex!!
     val context = LocalContext.current
     val myDB = myDatabase.getInstance(context)!!
+    val like = remember{ mutableStateOf(myDB.myDAO().getPet(item.desertionNo.toLong()) != null) }
 
     Box(modifier = Modifier
         .verticalScroll(rememberScrollState())
@@ -173,7 +171,7 @@ fun DetailAnimal(item: AnimalApiOutput){
 
 private object PetCardClick {
     val clicked = mutableStateOf(false)
-    val petIndex = mutableStateOf(0)
+    var petIndex : AnimalApiOutput? = null
 
     fun onClicked() {
         clicked.value = true
@@ -183,7 +181,7 @@ private object PetCardClick {
         clicked.value = false
     }
 
-    fun setIndex(new: Int) {
-        petIndex.value = new
+    fun setIndex(new: AnimalApiOutput) {
+        petIndex = new
     }
 }
