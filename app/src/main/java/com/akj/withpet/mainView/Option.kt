@@ -68,21 +68,5 @@ fun PlaceLike(){
 
 @Composable
 fun PetLike(){
-    test()
-}
 
-
-@Composable
-fun test(){
-    val context = LocalContext.current
-    val myDB = myDatabase.getInstance(context)!!
-
-    val petList = myDB.myDAO().getPet()
-    LazyColumn{
-        itemsIndexed(
-            items = petList
-        ){_, pet ->
-//            CardView(docItem = pet.animal)
-        }
-    }
 }

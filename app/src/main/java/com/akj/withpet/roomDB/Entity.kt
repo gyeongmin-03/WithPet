@@ -12,7 +12,7 @@ import com.google.gson.Gson
 @Entity
 data class petEntity (
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    val desertionNo: Long = 0L,
     @TypeConverters(Converters::class)
     val animal: AnimalApiOutput
 )

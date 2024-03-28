@@ -9,10 +9,13 @@ import androidx.room.Query
 @Dao
 interface DAO {
     @Query("SELECT * FROM petEntity")
-    fun getPet() : List<petEntity>
+    fun getPetList() : List<petEntity>
 
     @Query("SELECT * FROM placeEntity")
-    fun getPlace() : List<placeEntity>
+    fun getPlaceList() : List<placeEntity>
+
+    @Query("SELECT * FROM petEntity WHERE desertionNo = :desertionNo")
+    fun getPet(desertionNo : Long) : petEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun savePetLike(pet : petEntity)

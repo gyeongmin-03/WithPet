@@ -1,5 +1,6 @@
 package com.akj.withpet.mainView
 
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,10 +9,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,15 +21,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import coil.compose.AsyncImage
 import com.akj.withpet.R
 import com.akj.withpet.apiService.AnimalApiOutput
 import com.akj.withpet.apiService.MyViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.akj.withpet.roomDB.DAO
+import com.akj.withpet.roomDB.myDatabase
+import com.akj.withpet.roomDB.petEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -105,8 +113,9 @@ fun ImageComponent(imageUrl : String, modifier : Modifier) {
 
 @Composable
 fun DetailAnimal(item: AnimalApiOutput){
-    val animalViewModel = AnimalDetailViewModel()
-    val like = animalViewModel.like.collectAsState()
+    val like = remember{ mutableStateOf(false) }
+    val context = LocalContext.current
+    val myDB = myDatabase.getInstance(context)!!
 
     Box(modifier = Modifier
         .verticalScroll(rememberScrollState())
@@ -114,6 +123,28 @@ fun DetailAnimal(item: AnimalApiOutput){
         .fillMaxWidth()){
         Column {
             ImageComponent(imageUrl = item.popfile, Modifier.fillMaxSize())
+            Row{
+                Text("즐겨찾기")
+                Switch(
+                    checked = like.value,
+                    onCheckedChange ={
+                        like.value = it
+
+                        if(it == true){
+                            CoroutineScope(Dispatchers.IO).launch {
+                                myDB.myDAO().savePetLike(petEntity(desertionNo = item.desertionNo.toLong() ,animal = item))
+                            }
+                        }
+                        else {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                if(myDB.myDAO().getPet(item.desertionNo.toLong()) != null){
+                                    myDB.myDAO().deletePetLike(petEntity(item.desertionNo.toLong(), item))
+                                }
+                            }
+                        }
+                    }
+                )
+            }
             Text("유기번호 : ${item.desertionNo}")
             Text("접수일 : ${item.happenDt}")
             Text("품종 : ${item.kindCd}")
@@ -129,19 +160,7 @@ fun DetailAnimal(item: AnimalApiOutput){
             Text("담당자 : ${item.chargeNm}")
             Text("담당자 연락처: ${item.officetel}")
         }
-        IconButton(
-            onClick = {
-//                  like.value = !like.value
-                animalViewModel.toggleLike()
-            }
-        ) {
-            Icon(
-                painter = if(like.value) painterResource(R.drawable.ic_star_yellow) else painterResource(R.drawable.ic_star_black),
-                contentDescription = null,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-            )
-        }
+
 
         Icon(
             painter = painterResource(R.drawable.ic_close),
@@ -153,24 +172,19 @@ fun DetailAnimal(item: AnimalApiOutput){
     }
 }
 
-private object PetCardClick{
+private object PetCardClick {
     val clicked = mutableStateOf(false)
     val petIndex = mutableStateOf(0)
 
-    fun onClicked() {clicked.value = true}
-    fun offClicked() {clicked.value = false}
-
-    fun setIndex(new : Int){
-        petIndex.value = new
+    fun onClicked() {
+        clicked.value = true
     }
-}
 
+    fun offClicked() {
+        clicked.value = false
+    }
 
-class AnimalDetailViewModel : ViewModel() {
-    private val _like = MutableStateFlow(false)
-    val like: StateFlow<Boolean> = _like
-
-    fun toggleLike() {
-        _like.value = !_like.value
+    fun setIndex(new: Int) {
+        petIndex.value = new
     }
 }
