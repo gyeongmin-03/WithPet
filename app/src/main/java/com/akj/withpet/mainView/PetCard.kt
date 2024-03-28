@@ -91,21 +91,20 @@ fun PetCard(docItem : AnimalApiOutput, modifier : Modifier = Modifier, index : I
         shape = RoundedCornerShape(20.dp),
         elevation = 4.dp
     ) {
-        ImageComponent(docItem.popfile, modifier)
+        ImageComponent(docItem.popfile)
     }
 }
 
 
 
 @Composable
-fun ImageComponent(imageUrl : String, modifier : Modifier) {
+fun ImageComponent(imageUrl : String) {
     AsyncImage(
         model = imageUrl,
         contentDescription = null,
-        modifier = modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxWidth()
             .clip(RoundedCornerShape(20.dp)),
-        contentScale = ContentScale.Crop
+        contentScale = ContentScale.Fit
     )
 }
 
@@ -122,7 +121,7 @@ fun DetailAnimal(item: AnimalApiOutput){
         .fillMaxHeight()
         .fillMaxWidth()){
         Column {
-            ImageComponent(imageUrl = item.popfile, Modifier.fillMaxSize())
+            ImageComponent(imageUrl = item.popfile)
             Row{
                 Text("즐겨찾기")
                 Switch(
