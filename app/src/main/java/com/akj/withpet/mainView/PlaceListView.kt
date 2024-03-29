@@ -21,7 +21,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -30,19 +29,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.akj.withpet.EmptyToAll
-import com.akj.withpet.R
 import com.akj.withpet.REGION_ALL
-import com.akj.withpet.apiService.MyViewModel
 import com.akj.withpet.apiService.PlaceApiOutput
 import com.akj.withpet.region
 import com.akj.withpet.regionName
@@ -54,20 +49,20 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun PlaceListView(){
-    val clicked = remember{ PlaceClick.clicked }
+fun PlaceListView(doc : List<PlaceApiOutput>){
+    val placeListClicked = remember{ mutableStateOf(false) }
 
-    if(clicked.value){
-        DetailPlace()
+    if(placeListClicked.value){
+        DetailPlace(command = { placeListClicked.value = false})
     }
     else {
-        PlaceList()
+        PlaceList(doc){placeListClicked.value = true}
     }
 }
 
 
 @Composable
-fun DetailPlace(){
+fun DetailPlace(command : () -> Unit){
     val item = PlaceClick.placeIndex!!
     val context = LocalContext.current
     val myDB = myDatabase.getInstance(context)!!
@@ -102,20 +97,12 @@ fun DetailPlace(){
                 )
             }
         }
-
-
-        Icon(
-            painter = painterResource(R.drawable.ic_close),
-            contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .clickable { PlaceClick.offClicked() }
-        )
+        BackIcon(command)
     }
 }
 
 @Composable
-fun PlaceList(){
+fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
     val dropdownModifier = Modifier
         .width(110.dp)
         .heightIn(max = 300.dp)
@@ -127,9 +114,6 @@ fun PlaceList(){
     var isDropDown2 by remember { mutableStateOf(false) }
     var choiceRegion1 by remember { mutableStateOf(REGION_ALL) }
     var choiceRegion2 by remember { mutableStateOf(REGION_ALL) }
-
-    val placeList = MyViewModel.getPlaceApiData().value!!
-
 
     Column {
         Row {
@@ -190,13 +174,13 @@ fun PlaceList(){
 
         LazyColumn {
             itemsIndexed(
-                items = placeList.filter {
+                items = doc.filter {
                     searchText in it.title &&
                             choiceRegion1 in it.address &&
                             choiceRegion2 in it.address
                 },
             ) { _, item ->
-                ListBox(item)
+                ListBox(item){command.invoke()}
             }
         }
     }
@@ -204,16 +188,16 @@ fun PlaceList(){
 
 
 @Composable
-fun ListBox(item: PlaceApiOutput){
+fun ListBox(item: PlaceApiOutput, command: () -> Unit){
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 8.dp)
             .height(100.dp)
             .clickable {
-                PlaceClick.onClicked()
+                command.invoke()
                 PlaceClick.setIndex(item)
-                       },
+            },
         border = BorderStroke(width = 1.dp, color = Color.Black)
     ){
         Text("""
@@ -228,16 +212,7 @@ fun ListBox(item: PlaceApiOutput){
 
 
 private object PlaceClick {
-    val clicked = mutableStateOf(false)
     var placeIndex : PlaceApiOutput? = null
-
-    fun onClicked() {
-        clicked.value = true
-    }
-
-    fun offClicked() {
-        clicked.value = false
-    }
 
     fun setIndex(new: PlaceApiOutput) {
         placeIndex = new

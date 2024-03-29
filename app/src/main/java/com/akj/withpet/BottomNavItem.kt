@@ -8,6 +8,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -18,6 +20,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.akj.withpet.apiService.MyViewModel
 import com.akj.withpet.mainView.OptionView
 import com.akj.withpet.mainView.PetCardView
 import com.akj.withpet.mainView.PlaceListView
@@ -81,15 +84,18 @@ fun BottomNavigation(navController: NavHostController){
 
 @Composable
 fun NavigationGraph(navController: NavHostController){
+    val viewModel = MyViewModel
+    var petDoc by remember { viewModel.getPetApiData() }
+    var placeDoc by remember { viewModel.getPlaceApiData() }
     NavHost(navController = navController, startDestination = BottomNavItem.Card.screenRoute){
         composable(BottomNavItem.option.screenRoute){
             OptionView()
         }
         composable(BottomNavItem.Card.screenRoute){
-            PetCardView()
+            PetCardView(petDoc)
         }
         composable(BottomNavItem.List.screenRoute){
-            PlaceListView()
+            PlaceListView(placeDoc!!)
         }
     }
 }
