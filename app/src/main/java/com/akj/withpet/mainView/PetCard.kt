@@ -45,14 +45,14 @@ fun PetCardView(){
     val viewModel = MyViewModel
     var doc by remember { viewModel.getPetApiData() }
     val clicked = remember {
-        PetCardClick.clicked
+        mutableStateOf(false)
     }
 
     if(doc == null){
         Text("Document is null")
     } else {
         if(clicked.value){
-            DetailAnimal()
+            DetailAnimal(command = {clicked.value = false})
         }
         else{
             Column(modifier = Modifier.verticalScroll(rememberScrollState())){
@@ -61,11 +61,15 @@ fun PetCardView(){
                         PetCard(docItem = doc!![i-1],
                             Modifier
                                 .fillMaxWidth(0.5f)
-                                .fillMaxHeight(0.5f))
+                                .fillMaxHeight(0.5f),
+                            command = {clicked.value = true}
+                            )
                         PetCard(docItem = doc!![i],
                             Modifier
                                 .fillMaxWidth()
-                                .fillMaxHeight())
+                                .fillMaxHeight(),
+                            command = {clicked.value = true}
+                        )
                     }
                 }
             }
@@ -75,13 +79,13 @@ fun PetCardView(){
 
 
 @Composable
-private fun PetCard(docItem : AnimalApiOutput, modifier : Modifier = Modifier){
+private fun PetCard(docItem : AnimalApiOutput, modifier : Modifier = Modifier, command : () -> Unit){
     Card(
         modifier = modifier
             .padding(20.dp)
             .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(20.dp))
             .clickable {
-                PetCardClick.onClicked()
+                command.invoke()
                 PetCardClick.setIndex(docItem)
             },
         shape = RoundedCornerShape(20.dp),
@@ -108,7 +112,7 @@ fun ImageComponent(imageUrl : String) {
 
 
 @Composable
-fun DetailAnimal(){
+fun DetailAnimal(command: () -> Unit){
     val item = PetCardClick.petIndex!!
     val context = LocalContext.current
     val myDB = myDatabase.getInstance(context)!!
@@ -164,22 +168,13 @@ fun DetailAnimal(){
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .clickable { PetCardClick.offClicked() }
+                .clickable { command.invoke() }
         )
     }
 }
 
 private object PetCardClick {
-    val clicked = mutableStateOf(false)
     var petIndex : AnimalApiOutput? = null
-
-    fun onClicked() {
-        clicked.value = true
-    }
-
-    fun offClicked() {
-        clicked.value = false
-    }
 
     fun setIndex(new: AnimalApiOutput) {
         petIndex = new
