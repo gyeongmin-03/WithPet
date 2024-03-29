@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -51,7 +52,7 @@ fun OptionView() {
         }
     }
     else if(placeClicked.value){
-        Box{
+        Box(modifier = Modifier.fillMaxSize()){
             PlaceLike()
             Icon(
                 painter = painterResource(R.drawable.ic_close),
@@ -69,7 +70,7 @@ fun OptionView() {
         if(clicked.value){
             option_DetailAnimal(option_PetCardClick.petIndex!!)
         }else {
-            Box{
+            Box(modifier = Modifier.fillMaxSize()){
                 PetLike()
                 Icon(
                     painter = painterResource(R.drawable.ic_close),
