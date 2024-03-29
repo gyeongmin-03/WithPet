@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.akj.withpet.apiService.PlaceApiOutput
 
 @Dao
 interface DAO {
@@ -17,10 +18,13 @@ interface DAO {
     @Query("SELECT * FROM petEntity WHERE desertionNo = :desertionNo")
     fun getPet(desertionNo : Long) : petEntity?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Query("SELECT * FROM placeEntity WHERE place = :item")
+    fun getPlace(item : PlaceApiOutput) : placeEntity?
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun savePetLike(pet : petEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun savePlaceLike(place : placeEntity)
 
     @Delete

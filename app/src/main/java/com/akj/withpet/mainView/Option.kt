@@ -85,7 +85,9 @@ fun OptionView() {
 
 @Composable
 fun PlaceLike(){
-    PlaceListView()
+    val myDB = myDatabase.getInstance(LocalContext.current)!!
+
+    val likePetList = myDB.myDAO().getPetList()
 }
 
 @Composable
