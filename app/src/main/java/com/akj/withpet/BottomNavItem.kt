@@ -88,11 +88,11 @@ fun NavigationGraph(navController: NavHostController){
     var petDoc by remember { viewModel.getPetApiData() }
     var placeDoc by remember { viewModel.getPlaceApiData() }
     NavHost(navController = navController, startDestination = BottomNavItem.Card.screenRoute){
-        composable(BottomNavItem.option.screenRoute){
-            OptionView()
-        }
         composable(BottomNavItem.Card.screenRoute){
             PetCardView(petDoc)
+        }
+        composable(BottomNavItem.option.screenRoute){
+            OptionView()
         }
         composable(BottomNavItem.List.screenRoute){
             PlaceListView(placeDoc!!)

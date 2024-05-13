@@ -68,6 +68,8 @@ dependencies {
     implementation ("com.opencsv:opencsv:5.7.1")
     implementation ("com.google.code.gson:gson:2.9.1")
 
+    implementation("io.github.fornewid:naver-map-compose:1.6.0")
+
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
     annotationProcessor("androidx.room:room-compiler:$room_version")

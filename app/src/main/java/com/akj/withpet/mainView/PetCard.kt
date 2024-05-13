@@ -106,9 +106,6 @@ fun ImageComponent(imageUrl : String) {
 @Composable
 fun DetailAnimal(command: () -> Unit){
     val item = PetCardClick.petIndex!!
-    val context = LocalContext.current
-    val myDB = myDatabase.getInstance(context)!!
-    val like = remember{ mutableStateOf(myDB.myDAO().getPet(item.desertionNo.toLong()) != null) }
 
     Box(modifier = Modifier
         .verticalScroll(rememberScrollState())
@@ -116,45 +113,62 @@ fun DetailAnimal(command: () -> Unit){
         .fillMaxWidth()){
         Column {
             ImageComponent(imageUrl = item.popfile)
-            Row{
-                Text("즐겨찾기")
-                Switch(
-                    checked = like.value,
-                    onCheckedChange ={
-                        like.value = it
-
-                        if(it == true){
-                            CoroutineScope(Dispatchers.IO).launch {
-                                myDB.myDAO().savePetLike(petEntity(desertionNo = item.desertionNo.toLong() ,animal = item))
-                            }
-                        }
-                        else {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                if(myDB.myDAO().getPet(item.desertionNo.toLong()) != null){
-                                    myDB.myDAO().deletePetLike(petEntity(item.desertionNo.toLong(), item))
-                                }
-                            }
-                        }
-                    }
-                )
-            }
-            Text("유기번호 : ${item.desertionNo}")
-            Text("접수일 : ${item.happenDt}")
-            Text("품종 : ${item.kindCd}")
-            Text("출생 : ${item.age}")
-            Text("체중 : ${item.weight}")
-            Text("성별 : ${item.sexCd}")
-            Text("중성화 여부 : ${item.neuterYn}")
-            Text("특징 : ${item.specialMark}")
-            Text("보호소 이름 : ${item.careNm}")
-            Text("보호소 전화번호 : ${item.careTel}")
-            Text("보호소 주소 : ${item.careAddr}")
-            Text("관할기관 : ${item.orgNm}")
-            Text("담당자 : ${item.chargeNm}")
-            Text("담당자 연락처: ${item.officetel}")
+            LikeSwitch(item)
+            TextComponent(item)
         }
 
         BackIcon(command)
+    }
+}
+
+@Composable
+private fun TextComponent(item : AnimalApiOutput){
+    item.apply {
+        Text("유기번호 : $desertionNo")
+        Text("접수일 : $happenDt")
+        Text("품종 : $kindCd")
+        Text("출생 : $age")
+        Text("체중 : $weight")
+        Text("성별 : $sexCd")
+        Text("중성화 여부 : $neuterYn")
+        Text("특징 : $specialMark")
+        Text("보호소 이름 : $careNm")
+        Text("보호소 전화번호 : $careTel")
+        Text("보호소 주소 : $careAddr")
+        Text("관할기관 : $orgNm")
+        Text("담당자 : $chargeNm")
+        Text("담당자 연락처: $officetel")
+    }
+}
+
+
+@Composable
+private fun LikeSwitch(item : AnimalApiOutput){
+    val context = LocalContext.current
+    val myDB = myDatabase.getInstance(context)!!
+    val like = remember{ mutableStateOf(myDB.myDAO().getPet(item.desertionNo.toLong()) != null) }
+
+    Row{
+        Text("즐겨찾기")
+        Switch(
+            checked = like.value,
+            onCheckedChange ={
+                like.value = it
+
+                if(it == true){
+                    CoroutineScope(Dispatchers.IO).launch {
+                        myDB.myDAO().savePetLike(petEntity(desertionNo = item.desertionNo.toLong() ,animal = item))
+                    }
+                }
+                else {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        if(myDB.myDAO().getPet(item.desertionNo.toLong()) != null){
+                            myDB.myDAO().deletePetLike(petEntity(item.desertionNo.toLong(), item))
+                        }
+                    }
+                }
+            }
+        )
     }
 }
 

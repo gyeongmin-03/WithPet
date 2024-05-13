@@ -19,8 +19,7 @@ data class petEntity (
 
 @Entity
 data class placeEntity (
-    @PrimaryKey(autoGenerate = true)
-    val index: Int = 0,
+    @PrimaryKey()
     @TypeConverters(Converters::class)
     val place: PlaceApiOutput
 )

@@ -41,7 +41,9 @@ fun OptionView() {
     val myDB = myDatabase.getInstance(LocalContext.current)!!
 
     if(!placeClicked.value && !petClicked.value){
-        Box(contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+            contentAlignment = Alignment.Center
+        ) {
             Column {
                 Button(onClick = { placeClicked.value = true }) {
                     Text("장소 \n즐겨찾기")

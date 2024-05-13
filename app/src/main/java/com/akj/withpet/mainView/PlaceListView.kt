@@ -43,6 +43,16 @@ import com.akj.withpet.region
 import com.akj.withpet.regionName
 import com.akj.withpet.roomDB.myDatabase
 import com.akj.withpet.roomDB.placeEntity
+import com.naver.maps.geometry.LatLng
+import com.naver.maps.map.CameraPosition
+import com.naver.maps.map.compose.CameraPositionState
+import com.naver.maps.map.compose.ExperimentalNaverMapApi
+import com.naver.maps.map.compose.MapProperties
+import com.naver.maps.map.compose.MapUiSettings
+import com.naver.maps.map.compose.Marker
+import com.naver.maps.map.compose.MarkerState
+import com.naver.maps.map.compose.NaverMap
+import com.naver.maps.map.compose.rememberCameraPositionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -64,40 +74,111 @@ fun PlaceListView(doc : List<PlaceApiOutput>){
 @Composable
 fun DetailPlace(command : () -> Unit){
     val item = PlaceClick.placeIndex!!
-    val context = LocalContext.current
-    val myDB = myDatabase.getInstance(context)!!
-    val like = remember{ mutableStateOf(myDB.myDAO().getPlace(item) != null) }
-
 
     Box(modifier = Modifier
         .verticalScroll(rememberScrollState())
         .fillMaxHeight()
         .fillMaxWidth()){
         Column {
-            Row{
-                Text("즐겨찾기")
-                Switch(
-                    checked = like.value,
-                    onCheckedChange ={
-                        like.value = it
-
-                        if(it == true){
-                            CoroutineScope(Dispatchers.IO).launch {
-                                myDB.myDAO().savePlaceLike(placeEntity(place = item))
-                            }
-                        }
-                        else {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                if(myDB.myDAO().getPlace(item) != null){
-                                    myDB.myDAO().deletePlaceLike(placeEntity(place = item))
-                                }
-                            }
-                        }
-                    }
-                )
-            }
+            Navermap(lat = item.latitude.toDouble(), lon = item.longitude.toDouble())
+            LikeSwitch(item)
+            TextComponent(item)
         }
         BackIcon(command)
+    }
+}
+
+@Composable
+private fun LikeSwitch(item : PlaceApiOutput){
+    val context = LocalContext.current
+    val myDB = myDatabase.getInstance(context)!!
+    val like = remember{ mutableStateOf(myDB.myDAO().getPlace(item) != null) }
+
+    
+    Row{
+        Text("즐겨찾기")
+        Switch(
+            checked = like.value,
+            onCheckedChange ={
+                like.value = it
+
+                if(it == true){
+                    CoroutineScope(Dispatchers.IO).launch {
+                        myDB.myDAO().savePlaceLike(placeEntity(place = item))
+                    }
+                }
+                else {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        if(myDB.myDAO().getPlace(item) != null){
+                            myDB.myDAO().deletePlaceLike(placeEntity(place = item))
+                        }
+                    }
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun TextComponent(item : PlaceApiOutput){
+    item.apply {
+        Column {
+            Text(title)
+            Text(description)
+            Text(address)
+            Text(tel)
+            Text(homepage)
+            Text(closedDay)
+            Text(operatingTime)
+            Text(parking)
+            Text(sizeAble)
+            Text(limit)
+            Text(insideAble)
+            Text(outsudeAble)
+        }
+    }
+}
+
+@OptIn(ExperimentalNaverMapApi::class)
+@Composable
+fun Navermap(lat: Double, lon : Double){
+    val mapProperties by remember {
+        mutableStateOf(
+            MapProperties(
+                maxZoom = 10.0,
+                minZoom = 10.0
+            )
+        )
+    }
+    val mapUiSettings by remember {
+        mutableStateOf(
+            MapUiSettings(
+                isZoomGesturesEnabled = false,
+                isScrollGesturesEnabled = false,
+                isTiltGesturesEnabled = false,
+                isRotateGesturesEnabled = false,
+                isStopGesturesEnabled = false,
+                isCompassEnabled = false,
+                isScaleBarEnabled = false,
+                isZoomControlEnabled = false
+            )
+        )
+    }
+
+    val pos = LatLng(lat, lon)
+    val mapCameraPosition = rememberCameraPositionState{
+        position = CameraPosition(pos, 10.0)
+    }
+
+    NaverMap(
+        properties = mapProperties,
+        uiSettings = mapUiSettings,
+        cameraPositionState = mapCameraPosition,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Marker(
+            state = MarkerState(position = pos)
+        )
     }
 }
 
