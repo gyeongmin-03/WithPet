@@ -11,12 +11,12 @@ object ApiService {
     suspend fun getAnimal() : List<AnimalApiOutput>? {
         return withContext(Dispatchers.IO){
             try {
-                val pageNo : Int = (1..200).random()
+                val pageNo : Int = (1..100).random()
 
                 val urlBuilder = StringBuilder("https://apis.data.go.kr/1543061/abandonmentPublicSrvc/abandonmentPublic")
 
                 urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "="+ MyServiceKey.getAnimalServiceKey())
-                urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("10", "UTF-8"))
+                urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("20", "UTF-8"))
                 urlBuilder.append("&" + URLEncoder.encode("pageNo", "UTF-8") + "=" + URLEncoder.encode(pageNo.toString(), "UTF-8"))
                 urlBuilder.append("&" + URLEncoder.encode("state", "UTF-8") + "=" + URLEncoder.encode("protect", "UTF-8"))
 

@@ -100,7 +100,7 @@ fun OptionView() {
     }
     else {
         Box(modifier = Modifier.fillMaxSize()){
-            PetCardView(doc = myDB.myDAO().getPetList().map { it.animal })
+            PetCardView(doc = myDB.myDAO().getPetList().map { it.animal }, refesh = false)
             Icon(
                 painter = painterResource(R.drawable.ic_close),
                 contentDescription = null,

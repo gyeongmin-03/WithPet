@@ -1,6 +1,7 @@
 package com.akj.withpet.mainView
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,9 +34,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.akj.withpet.EmptyToAll
@@ -250,7 +253,7 @@ fun Navermap(lat: Double, lon : Double, command: () -> Unit){
 @Composable
 fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
     val dropdownModifier = Modifier
-        .width(110.dp)
+        .width(HalfWidthInDp())
         .heightIn(max = 300.dp)
     val keyboardController = LocalSoftwareKeyboardController.current
     var text by remember {mutableStateOf("")}
@@ -262,8 +265,23 @@ fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
     var choiceRegion2 by remember { mutableStateOf(REGION_ALL) }
 
     Column {
-        Row {
-            Button(onClick = { isDropDown1 = true }, modifier = Modifier.width(110.dp)) {
+        TextField(
+            value = text,
+            onValueChange = { text = it },
+            placeholder = {
+                Text("검색")
+            },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = {
+                keyboardController?.hide()
+                searchText = text
+            }
+            ),
+            modifier = Modifier.fillMaxWidth().padding(top = 10.dp, start = 5.dp, end = 5.dp)
+        )
+
+        Row(modifier = Modifier.padding(5.dp)) {
+            Button(onClick = { isDropDown1 = true }, modifier = Modifier.fillMaxWidth(0.5f)) {
                 Text(
                     text = EmptyToAll(choiceRegion1)
                 )
@@ -284,7 +302,7 @@ fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
                 }
             }
 
-            Button(onClick = { isDropDown2 = true }, modifier = Modifier.width(110.dp)) {
+            Button(onClick = { isDropDown2 = true }, modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = EmptyToAll(choiceRegion2)
                 )
@@ -294,7 +312,7 @@ fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
                 expanded = isDropDown2,
                 onDismissRequest = { isDropDown2 = false },
                 modifier = dropdownModifier,
-                offset = DpOffset(x = 105.dp, y = 0.dp)
+                offset = DpOffset(x = HalfWidthInDp(), y = 0.dp)
             ) {
                 region[choiceRegion1]!!.forEach {
                     DropdownMenuItem(onClick = { choiceRegion2 = it }) {
@@ -302,20 +320,6 @@ fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
                     }
                 }
             }
-
-            TextField(
-                value = text,
-                onValueChange = { text = it },
-                placeholder = {
-                    Text("검색")
-                },
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = {
-                    keyboardController?.hide()
-                    searchText = text
-                }
-                )
-            )
         }
 
         LazyColumn {
@@ -365,3 +369,9 @@ private object PlaceClick {
     }
 }
 
+@Composable
+fun HalfWidthInDp(): Dp {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val halfScreenWidth = screenWidth / 2
+    return halfScreenWidth
+}

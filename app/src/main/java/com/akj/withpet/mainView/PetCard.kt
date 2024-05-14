@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Switch
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.akj.withpet.R
 import com.akj.withpet.apiService.AnimalApiOutput
+import com.akj.withpet.apiService.MyViewModel
 import com.akj.withpet.roomDB.myDatabase
 import com.akj.withpet.roomDB.petEntity
 import kotlinx.coroutines.CoroutineScope
@@ -32,7 +34,7 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun PetCardView(doc : List<AnimalApiOutput>?){
+fun PetCardView(doc : List<AnimalApiOutput>?, refesh : Boolean = true){
     val petCardClicked = remember {
         mutableStateOf(false)
     }
@@ -62,6 +64,11 @@ fun PetCardView(doc : List<AnimalApiOutput>?){
                                 command = {petCardClicked.value = true}
                             )
                         }
+                    }
+                }
+                if(refesh == true){
+                    Button(onClick = { MyViewModel.setPetApiData() }) {
+                        Text(text = "새로고침 하기")
                     }
                 }
             }
