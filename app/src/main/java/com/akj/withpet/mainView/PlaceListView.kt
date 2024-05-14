@@ -160,14 +160,15 @@ fun FullSizeMap(lat: Double, lon : Double, command: () -> Unit){
         mutableStateOf(
             MapProperties(
                 maxZoom = 20.0,
-                minZoom = 7.0
+                minZoom = 7.0,
+                locationTrackingMode = LocationTrackingMode.NoFollow
             )
         )
     }
     val mapUiSettings by remember {
         mutableStateOf(
             MapUiSettings(
-                isLocationButtonEnabled = false
+                isLocationButtonEnabled = true
             )
         )
     }
@@ -179,6 +180,7 @@ fun FullSizeMap(lat: Double, lon : Double, command: () -> Unit){
 
     Box {
         NaverMap(
+            locationSource = rememberFusedLocationSource(),
             properties = mapProperties,
             uiSettings = mapUiSettings,
             cameraPositionState = mapCameraPosition,
