@@ -32,8 +32,8 @@ const val PetCard = "PetCardView"
 sealed class BottomNavItem(
     val title: Int, val icon: Int, val screenRoute: String
 ){
-    object option : BottomNavItem(R.string.text_pet_map, R.drawable.ic_map, Option)
     object List : BottomNavItem(R.string.text_pet_list, R.drawable.ic_list, PetList)
+    object option : BottomNavItem(R.string.text_pet_map, R.drawable.ic_map, Option)
     object Card : BottomNavItem(R.string.text_pet_card, R.drawable.ic_card, PetCard)
 }
 
@@ -41,8 +41,8 @@ sealed class BottomNavItem(
 @Composable
 fun BottomNavigation(navController: NavHostController){
     val items = listOf<BottomNavItem>(
-        BottomNavItem.option,
         BottomNavItem.Card,
+        BottomNavItem.option,
         BottomNavItem.List
     )
 
@@ -87,7 +87,7 @@ fun NavigationGraph(navController: NavHostController){
     val viewModel = MyViewModel
     var petDoc by remember { viewModel.getPetApiData() }
     var placeDoc by remember { viewModel.getPlaceApiData() }
-    NavHost(navController = navController, startDestination = BottomNavItem.Card.screenRoute){
+    NavHost(navController = navController, startDestination = BottomNavItem.option.screenRoute){
         composable(BottomNavItem.Card.screenRoute){
             PetCardView(petDoc)
         }

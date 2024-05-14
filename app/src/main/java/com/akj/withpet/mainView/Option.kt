@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,14 +42,27 @@ fun OptionView() {
     val myDB = myDatabase.getInstance(LocalContext.current)!!
 
     if(!placeClicked.value && !petClicked.value){
-        Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(),
             contentAlignment = Alignment.Center
         ) {
             Column {
-                Button(onClick = { placeClicked.value = true }) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .aspectRatio(0.9f)
+                        .clickable { placeClicked.value = true }
+                        .padding(10.dp)
+                ) {
                     Text("장소 \n즐겨찾기")
                 }
-                Button(onClick = { petClicked.value = true }) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f).aspectRatio(0.9f)
+                        .clickable { petClicked.value = true }
+                        .padding(10.dp)
+                ) {
                     Text("유기동물 \n즐겨찾기")
                 }
             }
