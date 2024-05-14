@@ -96,6 +96,7 @@ fun ImageComponent(imageUrl : String) {
         contentDescription = null,
         modifier = Modifier
             .fillMaxWidth()
+            .height(250.dp)
             .clip(RoundedCornerShape(20.dp)),
         contentScale = ContentScale.Fit
     )

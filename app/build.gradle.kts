@@ -69,6 +69,8 @@ dependencies {
     implementation ("com.google.code.gson:gson:2.9.1")
 
     implementation("io.github.fornewid:naver-map-compose:1.6.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("io.github.fornewid:naver-map-location:21.0.2")
 
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")

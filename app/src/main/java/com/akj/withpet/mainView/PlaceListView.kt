@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -47,12 +49,14 @@ import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
 import com.naver.maps.map.compose.CameraPositionState
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
+import com.naver.maps.map.compose.LocationTrackingMode
 import com.naver.maps.map.compose.MapProperties
 import com.naver.maps.map.compose.MapUiSettings
 import com.naver.maps.map.compose.Marker
 import com.naver.maps.map.compose.MarkerState
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.rememberCameraPositionState
+import com.naver.maps.map.compose.rememberFusedLocationSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -75,17 +79,27 @@ fun PlaceListView(doc : List<PlaceApiOutput>){
 fun DetailPlace(command : () -> Unit){
     val item = PlaceClick.placeIndex!!
 
-    Box(modifier = Modifier
-        .verticalScroll(rememberScrollState())
-        .fillMaxHeight()
-        .fillMaxWidth()){
-        Column {
-            Navermap(lat = item.latitude.toDouble(), lon = item.longitude.toDouble())
-            LikeSwitch(item)
-            TextComponent(item)
-        }
-        BackIcon(command)
+    val fullSizeMap = remember {
+        mutableStateOf(false)
     }
+
+    if(fullSizeMap.value == false){
+        Box(modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .fillMaxHeight()
+            .fillMaxWidth()){
+            Column {
+                Navermap(lat = item.latitude.toDouble(), lon = item.longitude.toDouble() ,command = {fullSizeMap.value = true})
+                LikeSwitch(item)
+                TextComponent(item)
+            }
+            BackIcon(command)
+        }
+    }
+    else {
+        FullSizeMap(lat = item.latitude.toDouble(), lon = item.longitude.toDouble() ,command = {fullSizeMap.value = false})
+    }
+
 }
 
 @Composable
@@ -141,11 +155,54 @@ private fun TextComponent(item : PlaceApiOutput){
 
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
-fun Navermap(lat: Double, lon : Double){
+fun FullSizeMap(lat: Double, lon : Double, command: () -> Unit){
     val mapProperties by remember {
         mutableStateOf(
             MapProperties(
-                maxZoom = 10.0,
+                maxZoom = 20.0,
+                minZoom = 7.0
+            )
+        )
+    }
+    val mapUiSettings by remember {
+        mutableStateOf(
+            MapUiSettings(
+                isLocationButtonEnabled = false
+            )
+        )
+    }
+
+    val pos = LatLng(lat, lon)
+    val mapCameraPosition = rememberCameraPositionState{
+        position = CameraPosition(pos, 10.0)
+    }
+
+    Box {
+        NaverMap(
+            properties = mapProperties,
+            uiSettings = mapUiSettings,
+            cameraPositionState = mapCameraPosition,
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+        ) {
+            Marker(
+                state = MarkerState(position = pos)
+            )
+        }
+        Button(onClick = { command.invoke() }, modifier = Modifier.align(Alignment.BottomEnd)) {
+        }
+    }
+}
+
+
+@OptIn(ExperimentalNaverMapApi::class)
+@Composable
+fun Navermap(lat: Double, lon : Double, command: () -> Unit){
+    val mapProperties by remember {
+        mutableStateOf(
+            MapProperties(
+                maxZoom = 20.0,
                 minZoom = 10.0
             )
         )
@@ -170,15 +227,21 @@ fun Navermap(lat: Double, lon : Double){
         position = CameraPosition(pos, 10.0)
     }
 
-    NaverMap(
-        properties = mapProperties,
-        uiSettings = mapUiSettings,
-        cameraPositionState = mapCameraPosition,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Marker(
-            state = MarkerState(position = pos)
-        )
+    Box {
+        NaverMap(
+            properties = mapProperties,
+            uiSettings = mapUiSettings,
+            cameraPositionState = mapCameraPosition,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
+        ) {
+            Marker(
+                state = MarkerState(position = pos)
+            )
+        }
+        Button(onClick = { command.invoke() }, modifier = Modifier.align(Alignment.BottomEnd)) {
+        }
     }
 }
 
@@ -299,3 +362,4 @@ private object PlaceClick {
         placeIndex = new
     }
 }
+
