@@ -23,9 +23,13 @@ import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,15 +38,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.akj.withpet.EmptyToAll
+import com.akj.withpet.R
 import com.akj.withpet.REGION_ALL
+import com.akj.withpet.addFocusCleaner
 import com.akj.withpet.apiService.PlaceApiOutput
 import com.akj.withpet.region
 import com.akj.withpet.regionName
@@ -195,7 +204,8 @@ fun FullSizeMap(lat: Double, lon : Double, command: () -> Unit){
                 state = MarkerState(position = pos)
             )
         }
-        Button(onClick = { command.invoke() }, modifier = Modifier.align(Alignment.BottomEnd)) {
+        IconButton(onClick = { command.invoke() }, modifier = Modifier.align(Alignment.BottomEnd)) {
+            Icon(painter = painterResource(R.drawable.ic_fullsize_exit), contentDescription = null)
         }
     }
 }
@@ -229,7 +239,7 @@ fun Navermap(lat: Double, lon : Double, command: () -> Unit){
 
     val pos = LatLng(lat, lon)
     val mapCameraPosition = rememberCameraPositionState{
-        position = CameraPosition(pos, 10.0)
+        position = CameraPosition(pos, 13.0)
     }
 
     Box {
@@ -245,7 +255,8 @@ fun Navermap(lat: Double, lon : Double, command: () -> Unit){
                 state = MarkerState(position = pos)
             )
         }
-        Button(onClick = { command.invoke() }, modifier = Modifier.align(Alignment.BottomEnd)) {
+        IconButton(onClick = { command.invoke() }, modifier = Modifier.align(Alignment.BottomEnd)) {
+            Icon(painter = painterResource(R.drawable.ic_fullsize), contentDescription = null)
         }
     }
 }
@@ -255,7 +266,7 @@ fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
     val dropdownModifier = Modifier
         .width(HalfWidthInDp())
         .heightIn(max = 300.dp)
-    val keyboardController = LocalSoftwareKeyboardController.current
+//    val keyboardController = LocalSoftwareKeyboardController.current
     var text by remember {mutableStateOf("")}
     var searchText by remember {mutableStateOf("")}
 
@@ -263,6 +274,8 @@ fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
     var isDropDown2 by remember { mutableStateOf(false) }
     var choiceRegion1 by remember { mutableStateOf(REGION_ALL) }
     var choiceRegion2 by remember { mutableStateOf(REGION_ALL) }
+
+    val focusManager = LocalFocusManager.current
 
     Column {
         TextField(
@@ -273,11 +286,12 @@ fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = {
-                keyboardController?.hide()
+//                keyboardController?.hide()
                 searchText = text
+                focusManager.clearFocus()
             }
             ),
-            modifier = Modifier.fillMaxWidth().padding(top = 10.dp, start = 5.dp, end = 5.dp)
+            modifier = Modifier.fillMaxWidth().padding(top = 10.dp, start = 5.dp, end = 5.dp).addFocusCleaner(focusManager)
         )
 
         Row(modifier = Modifier.padding(5.dp)) {
@@ -325,7 +339,7 @@ fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
         LazyColumn {
             itemsIndexed(
                 items = doc.filter {
-                    searchText in it.title &&
+                    (searchText in it.title || searchText in it.address) &&
                             choiceRegion1 in it.address &&
                             choiceRegion2 in it.address
                 },
