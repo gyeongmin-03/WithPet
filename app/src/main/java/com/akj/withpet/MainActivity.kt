@@ -41,7 +41,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             WithPetTheme {
-                MainScreenView()
+                Box{
+                    MainScreenView()
+                    GlobalLoadingScreen()
+                }
             }
         }
     }
@@ -65,6 +68,5 @@ fun MainScreenView(){
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    //        "051-341-3309",
-
+    GlobalLoadingScreen()
 }

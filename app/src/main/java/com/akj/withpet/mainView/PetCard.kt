@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.akj.withpet.LoadingState
 import com.akj.withpet.R
 import com.akj.withpet.apiService.AnimalApiOutput
 import com.akj.withpet.apiService.MyViewModel
@@ -30,7 +31,10 @@ import com.akj.withpet.roomDB.myDatabase
 import com.akj.withpet.roomDB.petEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.Thread.sleep
+import kotlin.concurrent.thread
 
 
 @Composable
@@ -41,6 +45,16 @@ fun PetCardView(doc : List<AnimalApiOutput>?, refesh : Boolean = true){
 
     if(doc == null){
         Text("Document is null")
+        Button(onClick = {
+            MyViewModel.setPetApiData()
+            thread {
+                LoadingState.show()
+                sleep(3*1000L)
+                LoadingState.hide()
+            }
+        }) {
+            Text(text = "새로고침 하기")
+        }
     } else {
         if(petCardClicked.value){
             DetailAnimal(command = {petCardClicked.value = false})
@@ -67,7 +81,14 @@ fun PetCardView(doc : List<AnimalApiOutput>?, refesh : Boolean = true){
                     }
                 }
                 if(refesh == true){
-                    Button(onClick = { MyViewModel.setPetApiData() }) {
+                    Button(onClick = {
+                        MyViewModel.setPetApiData()
+                        thread {
+                            LoadingState.show()
+                            sleep(3*1000L)
+                            LoadingState.hide()
+                        }
+                    }) {
                         Text(text = "새로고침 하기")
                     }
                 }
