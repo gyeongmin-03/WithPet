@@ -91,25 +91,28 @@ fun PlaceListView(doc : List<PlaceApiOutput>){
 fun DetailPlace(command : () -> Unit){
     val item = PlaceClick.placeIndex!!
 
-    val fullSizeMap = remember {
+    val textView = remember {
         mutableStateOf(false)
     }
 
-    if(fullSizeMap.value == false){
+    if(textView.value == false){
         Box(modifier = Modifier
-            .verticalScroll(rememberScrollState())
+//            .verticalScroll(rememberScrollState())
             .fillMaxHeight()
             .fillMaxWidth()){
             Column {
-                Navermap(lat = item.latitude.toDouble(), lon = item.longitude.toDouble() ,command = {fullSizeMap.value = true})
+                Navermap(lat = item.latitude.toDouble(), lon = item.longitude.toDouble())
                 LikeSwitch(item)
-                TextComponent(item)
+                Button(onClick = {textView.value = true}) {
+                    Text("상세 내용 보기")
+                }
             }
             BackIcon(command)
         }
     }
     else {
-        FullSizeMap(lat = item.latitude.toDouble(), lon = item.longitude.toDouble() ,command = {fullSizeMap.value = false})
+//        FullSizeMap(lat = item.latitude.toDouble(), lon = item.longitude.toDouble() ,command = {textView.value = false})
+        TextView(item = item, command = {textView.value = false})
     }
 
 }
@@ -165,74 +168,31 @@ private fun TextComponent(item : PlaceApiOutput){
     }
 }
 
-@OptIn(ExperimentalNaverMapApi::class)
 @Composable
-fun FullSizeMap(lat: Double, lon : Double, command: () -> Unit){
-    val mapProperties by remember {
-        mutableStateOf(
-            MapProperties(
-                maxZoom = 20.0,
-                minZoom = 7.0,
-                locationTrackingMode = LocationTrackingMode.NoFollow
-            )
-        )
-    }
-    val mapUiSettings by remember {
-        mutableStateOf(
-            MapUiSettings(
-                isLocationButtonEnabled = true
-            )
-        )
-    }
-
-    val pos = LatLng(lat, lon)
-    val mapCameraPosition = rememberCameraPositionState{
-        position = CameraPosition(pos, 10.0)
-    }
-
-    Box {
-        NaverMap(
-            locationSource = rememberFusedLocationSource(),
-            properties = mapProperties,
-            uiSettings = mapUiSettings,
-            cameraPositionState = mapCameraPosition,
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-        ) {
-            Marker(
-                state = MarkerState(position = pos)
-            )
-        }
-        IconButton(onClick = { command.invoke() }, modifier = Modifier.align(Alignment.BottomEnd)) {
-            Icon(painter = painterResource(R.drawable.ic_fullsize_exit), contentDescription = null)
-        }
+fun TextView(item: PlaceApiOutput, command: () -> Unit){
+    Box{
+        TextComponent(item)
+        BackIcon(command)
     }
 }
 
 
+
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
-fun Navermap(lat: Double, lon : Double, command: () -> Unit){
+fun Navermap(lat: Double, lon : Double){
     val mapProperties by remember {
         mutableStateOf(
             MapProperties(
                 maxZoom = 20.0,
-                minZoom = 10.0
+                minZoom = 7.0
             )
         )
     }
     val mapUiSettings by remember {
         mutableStateOf(
             MapUiSettings(
-                isZoomGesturesEnabled = false,
-                isScrollGesturesEnabled = false,
-                isTiltGesturesEnabled = false,
-                isRotateGesturesEnabled = false,
-                isStopGesturesEnabled = false,
-                isCompassEnabled = false,
-                isScaleBarEnabled = false,
-                isZoomControlEnabled = false
+                isLocationButtonEnabled = false
             )
         )
     }
@@ -242,22 +202,17 @@ fun Navermap(lat: Double, lon : Double, command: () -> Unit){
         position = CameraPosition(pos, 13.0)
     }
 
-    Box {
-        NaverMap(
-            properties = mapProperties,
-            uiSettings = mapUiSettings,
-            cameraPositionState = mapCameraPosition,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp)
-        ) {
-            Marker(
-                state = MarkerState(position = pos)
-            )
-        }
-        IconButton(onClick = { command.invoke() }, modifier = Modifier.align(Alignment.BottomEnd)) {
-            Icon(painter = painterResource(R.drawable.ic_fullsize), contentDescription = null)
-        }
+    NaverMap(
+        properties = mapProperties,
+        uiSettings = mapUiSettings,
+        cameraPositionState = mapCameraPosition,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(400.dp)
+    ) {
+        Marker(
+            state = MarkerState(position = pos)
+        )
     }
 }
 
@@ -291,11 +246,19 @@ fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
                 focusManager.clearFocus()
             }
             ),
-            modifier = Modifier.fillMaxWidth().padding(top = 10.dp, start = 5.dp, end = 5.dp).addFocusCleaner(focusManager)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp, start = 5.dp, end = 5.dp)
+                .addFocusCleaner(focusManager)
         )
 
         Row(modifier = Modifier.padding(5.dp)) {
-            Button(onClick = { isDropDown1 = true }, modifier = Modifier.fillMaxWidth(0.5f)) {
+            Button(onClick = {
+                isDropDown1 = true
+                focusManager.clearFocus()
+                             },
+                modifier = Modifier.fillMaxWidth(0.5f)
+            ) {
                 Text(
                     text = EmptyToAll(choiceRegion1)
                 )
@@ -316,7 +279,12 @@ fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
                 }
             }
 
-            Button(onClick = { isDropDown2 = true }, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = {
+                isDropDown2 = true
+                focusManager.clearFocus()
+                             }
+                , modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(
                     text = EmptyToAll(choiceRegion2)
                 )
