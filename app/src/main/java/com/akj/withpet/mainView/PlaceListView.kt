@@ -95,24 +95,21 @@ fun DetailPlace(command : () -> Unit){
         mutableStateOf(false)
     }
 
-    if(textView.value == false){
-        Box(modifier = Modifier
-//            .verticalScroll(rememberScrollState())
-            .fillMaxHeight()
-            .fillMaxWidth()){
-            Column {
+    Box(modifier = Modifier
+        .fillMaxHeight()
+        .fillMaxWidth()){
+        Column {
+            if(textView.value){
+                TextView(item = item, command = {textView.value = false})
+            }else {
                 Navermap(lat = item.latitude.toDouble(), lon = item.longitude.toDouble())
                 LikeSwitch(item)
-                Button(onClick = {textView.value = true}) {
-                    Text("상세 내용 보기")
-                }
             }
-            BackIcon(command)
+            Button(onClick = {textView.value = !textView.value}) {
+                Text("상세 내용 ${if(textView.value) "닫기" else "보기"}")
+            }
         }
-    }
-    else {
-//        FullSizeMap(lat = item.latitude.toDouble(), lon = item.longitude.toDouble() ,command = {textView.value = false})
-        TextView(item = item, command = {textView.value = false})
+        BackIcon(command)
     }
 
 }
