@@ -9,3 +9,6 @@ val Pink80 = Color(0xFFEFB8C8)
 val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
+
+val SkyBlue = Color(0xFFA1E2FF) //상세 설명에 사용
+val LightBlue = Color(0xFF6286EE)   //BottomNavi에 사용

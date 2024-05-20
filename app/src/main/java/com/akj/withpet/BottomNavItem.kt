@@ -1,10 +1,10 @@
 package com.akj.withpet
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,20 +21,21 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.akj.withpet.apiService.MyViewModel
-import com.akj.withpet.mainView.OptionView
+import com.akj.withpet.mainView.FavoriteView
 import com.akj.withpet.mainView.PetCardView
 import com.akj.withpet.mainView.PlaceListView
+import com.akj.withpet.ui.theme.LightBlue
 
-const val Option = "Option"
-const val PetList = "PetList"
+const val PetFavorite = "Favorite"
+const val PlaceList = "PetList"
 const val PetCard = "PetCardView"
 
 sealed class BottomNavItem(
     val title: Int, val icon: Int, val screenRoute: String
 ){
-    object List : BottomNavItem(R.string.text_pet_list, R.drawable.ic_list, PetList)
-    object option : BottomNavItem(R.string.text_pet_map, R.drawable.ic_map, Option)
-    object Card : BottomNavItem(R.string.text_pet_card, R.drawable.ic_card, PetCard)
+    object List : BottomNavItem(R.string.text_pet_list, R.drawable.ic_home_work, PlaceList)
+    object Favorite : BottomNavItem(R.string.text_pet_favorite, R.drawable.ic_star, PetFavorite)
+    object Card : BottomNavItem(R.string.text_pet_card, R.drawable.ic_pet, PetCard)
 }
 
 
@@ -42,11 +43,14 @@ sealed class BottomNavItem(
 fun BottomNavigation(navController: NavHostController){
     val items = listOf<BottomNavItem>(
         BottomNavItem.Card,
-        BottomNavItem.option,
+        BottomNavItem.Favorite,
         BottomNavItem.List
     )
 
-    androidx.compose.material.BottomNavigation {
+    androidx.compose.material.BottomNavigation(
+        backgroundColor = Color.White,
+        modifier = Modifier.border(width = 1.dp, color = Color.Black)
+    ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
@@ -73,8 +77,8 @@ fun BottomNavigation(navController: NavHostController){
                         restoreState = true
                     }
                 },
-                selectedContentColor = MaterialTheme.colors.primary,
-                unselectedContentColor = Color.Gray
+                selectedContentColor = LightBlue,
+                unselectedContentColor = Color.LightGray
             )
         }
     }
@@ -87,12 +91,12 @@ fun NavigationGraph(navController: NavHostController){
     val viewModel = MyViewModel
     var petDoc by remember { viewModel.getPetApiData() }
     var placeDoc by remember { viewModel.getPlaceApiData() }
-    NavHost(navController = navController, startDestination = BottomNavItem.option.screenRoute){
+    NavHost(navController = navController, startDestination = BottomNavItem.Favorite.screenRoute){
         composable(BottomNavItem.Card.screenRoute){
             PetCardView(petDoc)
         }
-        composable(BottomNavItem.option.screenRoute){
-            OptionView()
+        composable(BottomNavItem.Favorite.screenRoute){
+            FavoriteView()
         }
         composable(BottomNavItem.List.screenRoute){
             PlaceListView(placeDoc!!)

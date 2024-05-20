@@ -1,12 +1,15 @@
 package com.akj.withpet.mainView
 
+import android.graphics.drawable.shapes.RoundRectShape
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,22 +17,24 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,19 +42,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.akj.withpet.EmptyToAll
-import com.akj.withpet.R
 import com.akj.withpet.REGION_ALL
 import com.akj.withpet.addFocusCleaner
 import com.akj.withpet.apiService.PlaceApiOutput
@@ -57,18 +62,17 @@ import com.akj.withpet.region
 import com.akj.withpet.regionName
 import com.akj.withpet.roomDB.myDatabase
 import com.akj.withpet.roomDB.placeEntity
+import com.akj.withpet.ui.theme.LightBlue
+import com.akj.withpet.ui.theme.SkyBlue
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraPosition
-import com.naver.maps.map.compose.CameraPositionState
 import com.naver.maps.map.compose.ExperimentalNaverMapApi
-import com.naver.maps.map.compose.LocationTrackingMode
 import com.naver.maps.map.compose.MapProperties
 import com.naver.maps.map.compose.MapUiSettings
 import com.naver.maps.map.compose.Marker
 import com.naver.maps.map.compose.MarkerState
 import com.naver.maps.map.compose.NaverMap
 import com.naver.maps.map.compose.rememberCameraPositionState
-import com.naver.maps.map.compose.rememberFusedLocationSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -77,18 +81,18 @@ import kotlinx.coroutines.launch
 @Composable
 fun PlaceListView(doc : List<PlaceApiOutput>){
     val placeListClicked = remember{ mutableStateOf(false) }
-
+    val rememberListState = rememberLazyListState()
     if(placeListClicked.value){
-        DetailPlace(command = { placeListClicked.value = false})
+        PlaceView(command = { placeListClicked.value = false})
     }
     else {
-        PlaceList(doc){placeListClicked.value = true}
+        PlaceList(doc, rememberListState){placeListClicked.value = true}
     }
 }
 
 
 @Composable
-fun DetailPlace(command : () -> Unit){
+fun PlaceView(command : () -> Unit){
     val item = PlaceClick.placeIndex!!
 
     val textView = remember {
@@ -97,20 +101,31 @@ fun DetailPlace(command : () -> Unit){
 
     Box(modifier = Modifier
         .fillMaxHeight()
-        .fillMaxWidth()){
-        Column {
-            if(textView.value){
-                TextView(item = item, command = {textView.value = false})
-            }else {
+        .fillMaxWidth()
+    ){
+        if(textView.value){
+            BackIcon(command = {textView.value = false})
+            DetailPlace(item = item, command = {textView.value = false})
+        }else {
+            Column {
                 Navermap(lat = item.latitude.toDouble(), lon = item.longitude.toDouble())
                 LikeSwitch(item)
+                Button(
+                    onClick = { textView.value = true },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = LightBlue,
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier.fillMaxWidth().height(70.dp).padding(10.dp)
+                ) {
+                    Text("상세 내용 보기")
+                }
             }
-            Button(onClick = {textView.value = !textView.value}) {
-                Text("상세 내용 ${if(textView.value) "닫기" else "보기"}")
-            }
+            BackIcon(command)
         }
-        BackIcon(command)
     }
+
+
 
 }
 
@@ -121,7 +136,11 @@ private fun LikeSwitch(item : PlaceApiOutput){
     val like = remember{ mutableStateOf(myDB.myDAO().getPlace(item) != null) }
 
     
-    Row{
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.height(60.dp).fillMaxWidth().padding(horizontal = 20.dp)
+    ){
         Text("즐겨찾기")
         Switch(
             checked = like.value,
@@ -148,25 +167,67 @@ private fun LikeSwitch(item : PlaceApiOutput){
 @Composable
 private fun TextComponent(item : PlaceApiOutput){
     item.apply {
-        Column {
-            Text(title)
-            Text(description)
-            Text(address)
-            Text(tel)
-            Text(homepage)
-            Text(closedDay)
-            Text(operatingTime)
-            Text(parking)
-            Text(sizeAble)
-            Text(limit)
-            Text(insideAble)
-            Text(outsudeAble)
+        Column(modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(top = 25.dp)
+        ) {
+            TableRow("시설명",title)
+            TableRow("시설정보",description)
+            TableRow("주소",address)
+            TableRow("전화번호",tel)
+            TableRow("홈페이지",homepage)
+            TableRow("휴무일",closedDay)
+            TableRow("운영시간",operatingTime)
+            TableRow("주차가능 여부",parking)
+            TableRow("입장 가능 동물 크기",sizeAble)
+            TableRow("제한사항",limit)
+            TableRow("실내 가능 여부",insideAble)
+            TableRow("실내 가능 여부",outsudeAble)
         }
     }
 }
 
+
 @Composable
-fun TextView(item: PlaceApiOutput, command: () -> Unit){
+fun TableRow(title : String, content : String){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Max)
+    ){
+        Text(
+            text = title,
+            modifier = Modifier
+                .background(color = SkyBlue, shape = RectangleShape)
+                .border(
+                    border = BorderStroke(color = Color.Black, width = 0.5.dp),
+                    shape = RectangleShape
+                )
+                .width(100.dp)
+                .fillMaxHeight()
+                .padding(10.dp),
+            textAlign = TextAlign.Center
+        )
+
+        Text(
+            text = content,
+            modifier = Modifier
+                .border(
+                    border = BorderStroke(color = Color.Black, width = 0.5.dp),
+                    shape = RectangleShape
+                )
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(10.dp)
+                .align(Alignment.CenterVertically),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+
+@Composable
+fun DetailPlace(item: PlaceApiOutput, command: () -> Unit){
     Box{
         TextComponent(item)
         BackIcon(command)
@@ -208,19 +269,19 @@ fun Navermap(lat: Double, lon : Double){
             .height(400.dp)
     ) {
         Marker(
-            state = MarkerState(position = pos)
+            state = MarkerState(position = pos),
+            iconTintColor = Color.Blue
         )
     }
 }
 
 @Composable
-fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
+fun PlaceList(doc: List<PlaceApiOutput>, rememberListState : LazyListState ,command: () -> Unit){
     val dropdownModifier = Modifier
         .width(HalfWidthInDp())
         .heightIn(max = 300.dp)
-//    val keyboardController = LocalSoftwareKeyboardController.current
-    var text by remember {mutableStateOf("")}
-    var searchText by remember {mutableStateOf("")}
+    var text by remember { mutableStateOf(SearchTextSave.text)}
+    var searchText by remember {mutableStateOf(SearchTextSave.text)}
 
     var isDropDown1 by remember { mutableStateOf(false) }
     var isDropDown2 by remember { mutableStateOf(false) }
@@ -229,36 +290,37 @@ fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
 
     val focusManager = LocalFocusManager.current
 
-    Column {
+    Column{
         TextField(
             value = text,
             onValueChange = { text = it },
             placeholder = {
-                Text("검색")
+                Text("시설명, 주소 검색 (입력 후 \'완료\' 클릭)")
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = {
-//                keyboardController?.hide()
                 searchText = text
                 focusManager.clearFocus()
+                SearchTextSave.text = text
             }
             ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp, start = 5.dp, end = 5.dp)
-                .addFocusCleaner(focusManager)
+                .addFocusCleaner(focusManager),
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                textColor = Color.Black
+            ),
+            shape = RoundedCornerShape(20.dp)
         )
 
         Row(modifier = Modifier.padding(5.dp)) {
-            Button(onClick = {
+
+            RegionButton(text = choiceRegion1, Modifier.fillMaxWidth(0.5f)) {
                 isDropDown1 = true
                 focusManager.clearFocus()
-                             },
-                modifier = Modifier.fillMaxWidth(0.5f)
-            ) {
-                Text(
-                    text = EmptyToAll(choiceRegion1)
-                )
             }
 
             DropdownMenu(
@@ -275,16 +337,10 @@ fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
                     }
                 }
             }
-
-            Button(onClick = {
+            
+            RegionButton(text = choiceRegion2, Modifier.fillMaxWidth()) {
                 isDropDown2 = true
                 focusManager.clearFocus()
-                             }
-                , modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = EmptyToAll(choiceRegion2)
-                )
             }
 
             DropdownMenu(
@@ -301,7 +357,10 @@ fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
             }
         }
 
-        LazyColumn {
+
+        LazyColumn(
+            state = rememberListState
+        ) {
             itemsIndexed(
                 items = doc.filter {
                     (searchText in it.title || searchText in it.address) &&
@@ -312,6 +371,23 @@ fun PlaceList(doc: List<PlaceApiOutput>,command: () -> Unit){
                 ListBox(item){command.invoke()}
             }
         }
+    }
+}
+
+
+@Composable
+private fun RegionButton(text : String, modifier: Modifier ,command: () -> Unit){
+    Button(onClick = { command.invoke() },
+        modifier = modifier.padding(horizontal = 5.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = LightBlue,
+            contentColor = Color.White
+        ),
+        shape = CircleShape
+    ) {
+        Text(
+            text = EmptyToAll(text)
+        )
     }
 }
 
@@ -353,4 +429,8 @@ fun HalfWidthInDp(): Dp {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val halfScreenWidth = screenWidth / 2
     return halfScreenWidth
+}
+
+object SearchTextSave{
+    var text = ""
 }

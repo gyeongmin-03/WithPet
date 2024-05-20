@@ -7,11 +7,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ComposeCompilerApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -23,12 +25,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.akj.withpet.BackPressMove
 import com.akj.withpet.LoadingState
 import com.akj.withpet.R
 import com.akj.withpet.apiService.AnimalApiOutput
 import com.akj.withpet.apiService.MyViewModel
 import com.akj.withpet.roomDB.myDatabase
 import com.akj.withpet.roomDB.petEntity
+import com.akj.withpet.ui.theme.LightBlue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -42,32 +46,28 @@ fun PetCardView(doc : List<AnimalApiOutput>?, refesh : Boolean = true){
     val petCardClicked = remember {
         mutableStateOf(false)
     }
+    val rememberScrollState = rememberScrollState()
 
     if(doc == null){
-        Text("Document is null")
-        Button(onClick = {
-            MyViewModel.setPetApiData()
-            thread {
-                LoadingState.show()
-                sleep(3*1000L)
-                LoadingState.hide()
-            }
-        }) {
-            Text(text = "새로고침 하기")
+        Column {
+            Text("Document is null")
+            RefreshButton()
         }
     } else {
         if(petCardClicked.value){
             DetailAnimal(command = {petCardClicked.value = false})
         }
         else{
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())){
+            Column(modifier = Modifier
+                .verticalScroll(rememberScrollState)
+                .padding(horizontal = 10.dp)){
                 for (i in 0 until doc!!.size step 2){
                     val nextIndex = i + 1
                     Row {
                         PetCard(docItem = doc!![i],
                             Modifier
                                 .fillMaxWidth(0.5f)
-                                .fillMaxHeight(0.5f),
+                                .fillMaxHeight(),
                             command = {petCardClicked.value = true}
                             )
                         if(nextIndex < doc.size){
@@ -81,16 +81,7 @@ fun PetCardView(doc : List<AnimalApiOutput>?, refesh : Boolean = true){
                     }
                 }
                 if(refesh == true){
-                    Button(onClick = {
-                        MyViewModel.setPetApiData()
-                        thread {
-                            LoadingState.show()
-                            sleep(3*1000L)
-                            LoadingState.hide()
-                        }
-                    }) {
-                        Text(text = "새로고침 하기")
-                    }
+                    RefreshButton()
                 }
             }
         }
@@ -99,10 +90,31 @@ fun PetCardView(doc : List<AnimalApiOutput>?, refesh : Boolean = true){
 
 
 @Composable
+private fun RefreshButton(){
+    Button(
+        onClick = {
+        MyViewModel.setPetApiData()
+        thread {
+            LoadingState.show()
+            sleep(3*1000L)
+            LoadingState.hide()
+            }
+        },
+        modifier = Modifier.fillMaxWidth().height(70.dp).padding(10.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = LightBlue,
+            contentColor = Color.White
+        )
+    ) {
+        Text(text = "새로고침 하기")
+    }
+}
+
+@Composable
 private fun PetCard(docItem : AnimalApiOutput, modifier : Modifier = Modifier, command : () -> Unit){
     Card(
         modifier = modifier
-            .padding(20.dp)
+            .padding(10.dp)
             .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(20.dp))
             .clickable {
                 command.invoke()
@@ -124,7 +136,7 @@ fun ImageComponent(imageUrl : String) {
         contentDescription = null,
         modifier = Modifier
             .fillMaxWidth()
-            .height(250.dp)
+            .height(200.dp)
             .clip(RoundedCornerShape(20.dp)),
         contentScale = ContentScale.Fit
     )
@@ -145,7 +157,6 @@ fun DetailAnimal(command: () -> Unit){
             LikeSwitch(item)
             TextComponent(item)
         }
-
         BackIcon(command)
     }
 }
@@ -177,7 +188,11 @@ private fun LikeSwitch(item : AnimalApiOutput){
     val myDB = myDatabase.getInstance(context)!!
     val like = remember{ mutableStateOf(myDB.myDAO().getPet(item.desertionNo.toLong()) != null) }
 
-    Row{
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.height(60.dp).fillMaxWidth().padding(horizontal = 20.dp)
+    ){
         Text("즐겨찾기")
         Switch(
             checked = like.value,
@@ -203,6 +218,7 @@ private fun LikeSwitch(item : AnimalApiOutput){
 
 @Composable
 fun BackIcon(command: () -> Unit){
+    BackPressMove(command)
     Box{
         Icon(
             painter = painterResource(R.drawable.ic_back),

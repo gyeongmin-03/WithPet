@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.akj.withpet.apiService.MyViewModel
 import com.akj.withpet.apiService.PlaceApiOutput
+import com.akj.withpet.mainView.TableRow
 import com.akj.withpet.ui.theme.WithPetTheme
 import com.opencsv.CSVReader
 import java.io.InputStreamReader
@@ -54,6 +55,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreenView(){
     val navController = rememberNavController()
+    BackPressExit() // 뒤로가기 두 번 클릭 -> 앱 종료
     Scaffold(
         bottomBar = { BottomNavigation(navController) }
     ) {
@@ -68,5 +70,5 @@ fun MainScreenView(){
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    GlobalLoadingScreen()
+    TableRow("test", "asssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
 }
