@@ -73,6 +73,7 @@ private fun closeIconButton(modifier: Modifier, command : () -> Unit){
         contentDescription = null,
         modifier = modifier
             .clickable { command.invoke() }
+            .padding(10.dp)
     )
 }
 

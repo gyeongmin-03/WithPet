@@ -25,6 +25,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.akj.withpet.BackPressMove
 import com.akj.withpet.LoadingState
@@ -141,11 +143,11 @@ private fun PetCard(docItem : AnimalApiOutput, modifier : Modifier = Modifier, c
 
 
 @Composable
-fun ImageComponent(imageUrl : String) {
+fun ImageComponent(imageUrl : String, modifier: Modifier = Modifier) {
     AsyncImage(
         model = imageUrl,
         contentDescription = null,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(200.dp)
             .clip(RoundedCornerShape(20.dp)),
@@ -163,6 +165,9 @@ fun PetView(command: () -> Unit){
         mutableStateOf(false)
     }
 
+    val fullSizeImg = remember {
+        mutableStateOf(false)
+    }
     Box(modifier = Modifier
         .fillMaxHeight()
         .fillMaxWidth()){
@@ -171,8 +176,8 @@ fun PetView(command: () -> Unit){
             BackIcon(command = {textView.value = false})
         }
         else {
-            Column {
-                ImageComponent(imageUrl = item.popfile)
+            Column{
+                ImageComponent(imageUrl = item.popfile, Modifier.clickable { fullSizeImg.value = true })
                 LikeSwitch(item)
                 Button(
                     onClick = { textView.value = true },
@@ -189,7 +194,32 @@ fun PetView(command: () -> Unit){
                 }
             }
             BackIcon(command)
+
+            if(fullSizeImg.value){
+                FullSizeImage(imageUrl = item.popfile) { fullSizeImg.value = false }
+            }
         }
+    }
+}
+
+@Composable
+private fun FullSizeImage(imageUrl : String, command : () -> Unit){
+    Dialog(
+        onDismissRequest = {  },
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = true,
+        )
+    ) {
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .clickable { command.invoke() },
+            contentScale = ContentScale.Fit
+        )
     }
 }
 
@@ -198,8 +228,8 @@ private fun DetailPet(item : AnimalApiOutput){
     item.apply {
         Column(
             modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(top = 25.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(top = 25.dp)
         ) {
             TableRow("유기번호", desertionNo)
             TableRow("접수일", happenDt)
@@ -267,6 +297,7 @@ fun BackIcon(command: () -> Unit){
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .clickable { command.invoke() }
+                .padding(10.dp)
         )
     }
 }
