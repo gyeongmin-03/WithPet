@@ -104,8 +104,8 @@ fun PlaceView(command : () -> Unit){
         .fillMaxWidth()
     ){
         if(textView.value){
+            DetailPlace(item = item)
             BackIcon(command = {textView.value = false})
-            DetailPlace(item = item, command = {textView.value = false})
         }else {
             Column {
                 Navermap(lat = item.latitude.toDouble(), lon = item.longitude.toDouble())
@@ -165,30 +165,6 @@ private fun LikeSwitch(item : PlaceApiOutput){
 }
 
 @Composable
-private fun TextComponent(item : PlaceApiOutput){
-    item.apply {
-        Column(modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(top = 25.dp)
-        ) {
-            TableRow("시설명",title)
-            TableRow("시설정보",description)
-            TableRow("주소",address)
-            TableRow("전화번호",tel)
-            TableRow("홈페이지",homepage)
-            TableRow("휴무일",closedDay)
-            TableRow("운영시간",operatingTime)
-            TableRow("주차가능 여부",parking)
-            TableRow("입장 가능 동물 크기",sizeAble)
-            TableRow("제한사항",limit)
-            TableRow("실내 가능 여부",insideAble)
-            TableRow("실내 가능 여부",outsudeAble)
-        }
-    }
-}
-
-
-@Composable
 fun TableRow(title : String, content : String){
     Row(
         modifier = Modifier
@@ -227,10 +203,25 @@ fun TableRow(title : String, content : String){
 
 
 @Composable
-fun DetailPlace(item: PlaceApiOutput, command: () -> Unit){
-    Box{
-        TextComponent(item)
-        BackIcon(command)
+fun DetailPlace(item: PlaceApiOutput){
+    item.apply {
+        Column(modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(top = 25.dp)
+        ) {
+            TableRow("시설명",title)
+            TableRow("시설정보",description)
+            TableRow("주소",address)
+            TableRow("전화번호",tel)
+            TableRow("홈페이지",homepage)
+            TableRow("휴무일",closedDay)
+            TableRow("운영시간",operatingTime)
+            TableRow("주차가능 여부",parking)
+            TableRow("입장 가능 동물 크기",sizeAble)
+            TableRow("제한사항",limit)
+            TableRow("실내 가능 여부",insideAble)
+            TableRow("실내 가능 여부",outsudeAble)
+        }
     }
 }
 

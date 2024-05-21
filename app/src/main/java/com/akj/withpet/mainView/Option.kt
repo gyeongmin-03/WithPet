@@ -59,7 +59,7 @@ fun FavoriteView() {
     }
     else {
         Box(modifier = Modifier.fillMaxSize()){
-            PetCardView(doc = myDB.myDAO().getPetList().map { it.animal }, refesh = false)
+            PetCardView(doc = myDB.myDAO().getPetList().map { it.animal }, refresh = false)
             closeIconButton(modifier = Modifier.align(Alignment.TopEnd), command = {petClicked.value = false})
         }
     }

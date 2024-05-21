@@ -48,8 +48,16 @@ object ApiService {
                         val age = item.select("age").text() //나이
                         val weight = item.select("weight").text() //체중
                         val popfile = item.select("popfile").text() //사진
-                        val sexCd = item.select("sexCd").text() //성별
-                        val neuterYn = item.select("neuterYn").text() //중성화 여부
+                        val sexCd = when(item.select("sexCd").text()){//성별
+                            "M" -> "수컷"
+                            "F" -> "암컷"
+                            else -> "미상"
+                        }
+                        val neuterYn = when(item.select("neuterYn").text()){ //중성화 여부
+                            "Y" -> "예"
+                            "N" -> "아니오"
+                            else -> "미상"
+                        }
                         val specialMark = item.select("specialMark").text() //특징
                         val careNm = item.select("careNm").text() //보호소 이름
                         val careTel = item.select("careTel").text() //보호소 전화번호

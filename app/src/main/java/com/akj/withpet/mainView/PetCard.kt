@@ -1,5 +1,6 @@
 package com.akj.withpet.mainView
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -42,7 +43,7 @@ import kotlin.concurrent.thread
 
 
 @Composable
-fun PetCardView(doc : List<AnimalApiOutput>?, refesh : Boolean = true){
+fun PetCardView(doc : List<AnimalApiOutput>?, refresh : Boolean = true){
     val petCardClicked = remember {
         mutableStateOf(false)
     }
@@ -55,35 +56,42 @@ fun PetCardView(doc : List<AnimalApiOutput>?, refesh : Boolean = true){
         }
     } else {
         if(petCardClicked.value){
-            DetailAnimal(command = {petCardClicked.value = false})
+            PetView(command = {petCardClicked.value = false})
         }
         else{
-            Column(modifier = Modifier
-                .verticalScroll(rememberScrollState)
-                .padding(horizontal = 10.dp)){
-                for (i in 0 until doc!!.size step 2){
-                    val nextIndex = i + 1
-                    Row {
-                        PetCard(docItem = doc!![i],
-                            Modifier
-                                .fillMaxWidth(0.5f)
-                                .fillMaxHeight(),
-                            command = {petCardClicked.value = true}
-                            )
-                        if(nextIndex < doc.size){
-                            PetCard(docItem = doc!![nextIndex],
-                                Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight(),
-                                command = {petCardClicked.value = true}
-                            )
-                        }
-                    }
-                }
-                if(refesh == true){
-                    RefreshButton()
+            PetCardList(rememberScrollState, doc, refresh) {
+                petCardClicked.value = true
+            }
+        }
+    }
+}
+
+@Composable
+private fun PetCardList(rememberScrollState : ScrollState, doc : List<AnimalApiOutput>?, refresh: Boolean, command: () -> Unit){
+    Column(modifier = Modifier
+        .verticalScroll(rememberScrollState)
+        .padding(horizontal = 10.dp)){
+        for (i in 0 until doc!!.size step 2){
+            val nextIndex = i + 1
+            Row {
+                PetCard(docItem = doc!![i],
+                    Modifier
+                        .fillMaxWidth(0.5f)
+                        .fillMaxHeight(),
+                    command
+                )
+                if(nextIndex < doc.size){
+                    PetCard(docItem = doc!![nextIndex],
+                        Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(),
+                        command
+                    )
                 }
             }
+        }
+        if(refresh == true){
+            RefreshButton()
         }
     }
 }
@@ -100,7 +108,10 @@ private fun RefreshButton(){
             LoadingState.hide()
             }
         },
-        modifier = Modifier.fillMaxWidth().height(70.dp).padding(10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp)
+            .padding(10.dp),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = LightBlue,
             contentColor = Color.White
@@ -145,39 +156,66 @@ fun ImageComponent(imageUrl : String) {
 
 
 @Composable
-fun DetailAnimal(command: () -> Unit){
+fun PetView(command: () -> Unit){
     val item = PetCardClick.petIndex!!
 
+    val textView = remember {
+        mutableStateOf(false)
+    }
+
     Box(modifier = Modifier
-        .verticalScroll(rememberScrollState())
         .fillMaxHeight()
         .fillMaxWidth()){
-        Column {
-            ImageComponent(imageUrl = item.popfile)
-            LikeSwitch(item)
-            TextComponent(item)
+        if(textView.value){
+            DetailPet(item)
+            BackIcon(command = {textView.value = false})
         }
-        BackIcon(command)
+        else {
+            Column {
+                ImageComponent(imageUrl = item.popfile)
+                LikeSwitch(item)
+                Button(
+                    onClick = { textView.value = true },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = LightBlue,
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(70.dp)
+                        .padding(10.dp)
+                ) {
+                    Text("상세 내용 보기")
+                }
+            }
+            BackIcon(command)
+        }
     }
 }
 
 @Composable
-private fun TextComponent(item : AnimalApiOutput){
+private fun DetailPet(item : AnimalApiOutput){
     item.apply {
-        Text("유기번호 : $desertionNo")
-        Text("접수일 : $happenDt")
-        Text("품종 : $kindCd")
-        Text("출생 : $age")
-        Text("체중 : $weight")
-        Text("성별 : $sexCd")
-        Text("중성화 여부 : $neuterYn")
-        Text("특징 : $specialMark")
-        Text("보호소 이름 : $careNm")
-        Text("보호소 전화번호 : $careTel")
-        Text("보호소 주소 : $careAddr")
-        Text("관할기관 : $orgNm")
-        Text("담당자 : $chargeNm")
-        Text("담당자 연락처: $officetel")
+        Column(
+            modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(top = 25.dp)
+        ) {
+            TableRow("유기번호", desertionNo)
+            TableRow("접수일", happenDt)
+            TableRow("품종", kindCd)
+            TableRow("출생", age)
+            TableRow("체중", weight)
+            TableRow("성별", sexCd)
+            TableRow("중성화 여부", neuterYn)
+            TableRow("특징",specialMark)
+            TableRow("보호소 이름",careNm)
+            TableRow("보호소 전화번호",careTel)
+            TableRow("보호소 주소",careAddr)
+            TableRow("관할기관",orgNm)
+            TableRow("담당자",chargeNm)
+            TableRow("담당자 연락처", officetel)
+        }
     }
 }
 
@@ -191,7 +229,10 @@ private fun LikeSwitch(item : AnimalApiOutput){
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.height(60.dp).fillMaxWidth().padding(horizontal = 20.dp)
+        modifier = Modifier
+            .height(60.dp)
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
     ){
         Text("즐겨찾기")
         Switch(
