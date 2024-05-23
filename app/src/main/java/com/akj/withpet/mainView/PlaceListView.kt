@@ -1,6 +1,5 @@
 package com.akj.withpet.mainView
 
-import android.graphics.drawable.shapes.RoundRectShape
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,12 +9,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -31,6 +32,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -42,26 +44,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.paint
-import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.akj.withpet.EmptyToAll
+import com.akj.withpet.R
 import com.akj.withpet.REGION_ALL
 import com.akj.withpet.addFocusCleaner
+import com.akj.withpet.apiService.MyViewModel
 import com.akj.withpet.apiService.PlaceApiOutput
 import com.akj.withpet.region
 import com.akj.withpet.regionName
 import com.akj.withpet.roomDB.myDatabase
 import com.akj.withpet.roomDB.placeEntity
+import com.akj.withpet.ui.theme.Gray
 import com.akj.withpet.ui.theme.LightBlue
 import com.akj.withpet.ui.theme.SkyBlue
 import com.naver.maps.geometry.LatLng
@@ -76,6 +83,8 @@ import com.naver.maps.map.compose.rememberCameraPositionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.lang.Thread.sleep
+import kotlin.concurrent.thread
 
 
 @Composable
@@ -116,7 +125,10 @@ fun PlaceView(command : () -> Unit){
                         backgroundColor = LightBlue,
                         contentColor = Color.White
                     ),
-                    modifier = Modifier.fillMaxWidth().height(70.dp).padding(10.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(70.dp)
+                        .padding(10.dp)
                 ) {
                     Text("상세 내용 보기")
                 }
@@ -139,7 +151,10 @@ private fun LikeSwitch(item : PlaceApiOutput){
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.height(60.dp).fillMaxWidth().padding(horizontal = 20.dp)
+        modifier = Modifier
+            .height(60.dp)
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
     ){
         Text("즐겨찾기")
         Switch(
@@ -220,7 +235,7 @@ fun DetailPlace(item: PlaceApiOutput){
             TableRow("입장 가능 동물 크기",sizeAble)
             TableRow("제한사항",limit)
             TableRow("실내 가능 여부",insideAble)
-            TableRow("실내 가능 여부",outsudeAble)
+            TableRow("실외 가능 여부",outsudeAble)
         }
     }
 }
@@ -389,18 +404,39 @@ fun ListBox(item: PlaceApiOutput, command: () -> Unit){
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 8.dp)
-            .height(100.dp)
+            .wrapContentHeight()
             .clickable {
                 command.invoke()
                 PlaceClick.setIndex(item)
             },
         border = BorderStroke(width = 1.dp, color = Color.Black)
     ){
-        Text("""
-            ${item.title}
-            ${item.description}
-            ${item.address}
-        """.trimIndent())
+        Row(modifier = Modifier.fillMaxWidth().padding(10.dp)){
+            Column(modifier = Modifier.fillMaxWidth(0.9f).padding(end=5.dp)) {
+                Text(
+                    item.description,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Gray,
+                    fontSize = 12.sp
+                )
+                Text(
+                    item.title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(vertical = 5.dp)
+                )
+                Text(
+                    item.address,
+                    fontSize = 15.sp
+                )
+            }
+            Icon(
+                painter = painterResource(R.drawable.ic_right),
+                contentDescription = null,
+                modifier = Modifier.fillMaxHeight().aspectRatio(1f).align(Alignment.CenterVertically)
+                )
+        }
     }
 }
 
@@ -424,4 +460,34 @@ fun HalfWidthInDp(): Dp {
 
 object SearchTextSave{
     var text = ""
+}
+
+@Composable
+fun Test(){
+    var placeDoc by remember { MyViewModel.getPlaceApiData() }
+    val place = remember { mutableStateOf(placeDoc!!.random())}
+    val color = arrayOf(Color.Blue, Color.Green)
+    var time = 0
+
+    if(time > 9){
+        place.value = placeDoc!!.random()
+        time = 0
+    }
+    else {
+        time++
+        thread { sleep(1000L) }
+    }
+
+    Row{
+        if(time % 2 == 0){
+            Text("이런 곳은\n어떤가요?", fontSize = 25.sp, color = color[time%2])
+        }
+        else {
+            Text("이런 곳은\n어떤가요?", fontSize = 25.sp, color = color[time%2])
+        }
+        Column {
+            Text(place.value.title)
+            Text(place.value.description, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+    }
 }
