@@ -1,5 +1,6 @@
 package com.akj.withpet.mainView
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,6 +39,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -83,39 +85,38 @@ import com.naver.maps.map.compose.rememberCameraPositionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Thread.sleep
-import kotlin.concurrent.thread
+import kotlin.concurrent.timer
 
 
 @Composable
-fun PlaceListView(doc : List<PlaceApiOutput>){
-    val placeListClicked = remember{ mutableStateOf(false) }
+fun PlaceListView(doc: List<PlaceApiOutput>, recomemnd: Boolean) {
+    val placeListClicked = remember { mutableStateOf(false) }
     val rememberListState = rememberLazyListState()
-    if(placeListClicked.value){
-        PlaceView(command = { placeListClicked.value = false})
-    }
-    else {
-        PlaceList(doc, rememberListState){placeListClicked.value = true}
+    if (placeListClicked.value) {
+        PlaceView(command = { placeListClicked.value = false })
+    } else {
+        PlaceList(doc, rememberListState, recomemnd) { placeListClicked.value = true }
     }
 }
 
 
 @Composable
-fun PlaceView(command : () -> Unit){
+fun PlaceView(command: () -> Unit) {
     val item = PlaceClick.placeIndex!!
 
     val textView = remember {
         mutableStateOf(false)
     }
 
-    Box(modifier = Modifier
-        .fillMaxHeight()
-        .fillMaxWidth()
-    ){
-        if(textView.value){
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .fillMaxWidth()
+    ) {
+        if (textView.value) {
             DetailPlace(item = item)
-            BackIcon(command = {textView.value = false})
-        }else {
+            BackIcon(command = { textView.value = false })
+        } else {
             Column {
                 Navermap(lat = item.latitude.toDouble(), lon = item.longitude.toDouble())
                 LikeSwitch(item)
@@ -138,16 +139,15 @@ fun PlaceView(command : () -> Unit){
     }
 
 
-
 }
 
 @Composable
-private fun LikeSwitch(item : PlaceApiOutput){
+private fun LikeSwitch(item: PlaceApiOutput) {
     val context = LocalContext.current
     val myDB = myDatabase.getInstance(context)!!
-    val like = remember{ mutableStateOf(myDB.myDAO().getPlace(item) != null) }
+    val like = remember { mutableStateOf(myDB.myDAO().getPlace(item) != null) }
 
-    
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -155,21 +155,20 @@ private fun LikeSwitch(item : PlaceApiOutput){
             .height(60.dp)
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
-    ){
+    ) {
         Text("즐겨찾기")
         Switch(
             checked = like.value,
-            onCheckedChange ={
+            onCheckedChange = {
                 like.value = it
 
-                if(it == true){
+                if (it == true) {
                     CoroutineScope(Dispatchers.IO).launch {
                         myDB.myDAO().savePlaceLike(placeEntity(place = item))
                     }
-                }
-                else {
+                } else {
                     CoroutineScope(Dispatchers.IO).launch {
-                        if(myDB.myDAO().getPlace(item) != null){
+                        if (myDB.myDAO().getPlace(item) != null) {
                             myDB.myDAO().deletePlaceLike(placeEntity(place = item))
                         }
                     }
@@ -180,12 +179,12 @@ private fun LikeSwitch(item : PlaceApiOutput){
 }
 
 @Composable
-fun TableRow(title : String, content : String){
+fun TableRow(title: String, content: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Max)
-    ){
+    ) {
         Text(
             text = title,
             modifier = Modifier
@@ -218,33 +217,33 @@ fun TableRow(title : String, content : String){
 
 
 @Composable
-fun DetailPlace(item: PlaceApiOutput){
+fun DetailPlace(item: PlaceApiOutput) {
     item.apply {
-        Column(modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(top = 25.dp)
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(top = 25.dp)
         ) {
-            TableRow("시설명",title)
-            TableRow("시설정보",description)
-            TableRow("주소",address)
-            TableRow("전화번호",tel)
-            TableRow("홈페이지",homepage)
-            TableRow("휴무일",closedDay)
-            TableRow("운영시간",operatingTime)
-            TableRow("주차가능 여부",parking)
-            TableRow("입장 가능 동물 크기",sizeAble)
-            TableRow("제한사항",limit)
-            TableRow("실내 가능 여부",insideAble)
-            TableRow("실외 가능 여부",outsudeAble)
+            TableRow("시설명", title)
+            TableRow("시설정보", description)
+            TableRow("주소", address)
+            TableRow("전화번호", tel)
+            TableRow("홈페이지", homepage)
+            TableRow("휴무일", closedDay)
+            TableRow("운영시간", operatingTime)
+            TableRow("주차가능 여부", parking)
+            TableRow("입장 가능 동물 크기", sizeAble)
+            TableRow("제한사항", limit)
+            TableRow("실내 가능 여부", insideAble)
+            TableRow("실외 가능 여부", outsudeAble)
         }
     }
 }
 
 
-
 @OptIn(ExperimentalNaverMapApi::class)
 @Composable
-fun Navermap(lat: Double, lon : Double){
+fun Navermap(lat: Double, lon: Double) {
     val mapProperties by remember {
         mutableStateOf(
             MapProperties(
@@ -262,7 +261,7 @@ fun Navermap(lat: Double, lon : Double){
     }
 
     val pos = LatLng(lat, lon)
-    val mapCameraPosition = rememberCameraPositionState{
+    val mapCameraPosition = rememberCameraPositionState {
         position = CameraPosition(pos, 13.0)
     }
 
@@ -282,12 +281,12 @@ fun Navermap(lat: Double, lon : Double){
 }
 
 @Composable
-fun PlaceList(doc: List<PlaceApiOutput>, rememberListState : LazyListState ,command: () -> Unit){
+fun PlaceList(doc: List<PlaceApiOutput>, rememberListState: LazyListState, recomemnd: Boolean, command: () -> Unit) {
     val dropdownModifier = Modifier
         .width(HalfWidthInDp())
         .heightIn(max = 300.dp)
-    var text by remember { mutableStateOf(SearchTextSave.text)}
-    var searchText by remember {mutableStateOf(SearchTextSave.text)}
+    var text by remember { mutableStateOf(SearchTextSave.text) }
+    var searchText by remember { mutableStateOf(SearchTextSave.text) }
 
     var isDropDown1 by remember { mutableStateOf(false) }
     var isDropDown2 by remember { mutableStateOf(false) }
@@ -296,7 +295,7 @@ fun PlaceList(doc: List<PlaceApiOutput>, rememberListState : LazyListState ,comm
 
     val focusManager = LocalFocusManager.current
 
-    Column{
+    Column {
         TextField(
             value = text,
             onValueChange = { text = it },
@@ -343,7 +342,7 @@ fun PlaceList(doc: List<PlaceApiOutput>, rememberListState : LazyListState ,comm
                     }
                 }
             }
-            
+
             RegionButton(text = choiceRegion2, Modifier.fillMaxWidth()) {
                 isDropDown2 = true
                 focusManager.clearFocus()
@@ -373,17 +372,23 @@ fun PlaceList(doc: List<PlaceApiOutput>, rememberListState : LazyListState ,comm
                             choiceRegion1 in it.address &&
                             choiceRegion2 in it.address
                 },
-            ) { _, item ->
-                ListBox(item){command.invoke()}
+            ) { i, item ->
+                if (i % 10 == 0) {
+                    RecommandList(recomemnd, command)
+                }
+                ListBox(item) { command.invoke() }
             }
         }
+
+
     }
 }
 
 
 @Composable
-private fun RegionButton(text : String, modifier: Modifier ,command: () -> Unit){
-    Button(onClick = { command.invoke() },
+private fun RegionButton(text: String, modifier: Modifier, command: () -> Unit) {
+    Button(
+        onClick = { command.invoke() },
         modifier = modifier.padding(horizontal = 5.dp),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = LightBlue,
@@ -399,7 +404,7 @@ private fun RegionButton(text : String, modifier: Modifier ,command: () -> Unit)
 
 
 @Composable
-fun ListBox(item: PlaceApiOutput, command: () -> Unit){
+fun ListBox(item: PlaceApiOutput, recomemnd : Boolean = false, command: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -410,9 +415,27 @@ fun ListBox(item: PlaceApiOutput, command: () -> Unit){
                 PlaceClick.setIndex(item)
             },
         border = BorderStroke(width = 1.dp, color = Color.Black)
-    ){
-        Row(modifier = Modifier.fillMaxWidth().padding(10.dp)){
-            Column(modifier = Modifier.fillMaxWidth(0.9f).padding(end=5.dp)) {
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = if(recomemnd) SkyBlue else Color.White)
+                .padding(10.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .padding(end = 5.dp)
+            ) {
+                if(recomemnd){
+                    Text(
+                        "추천하는 장소예요!!",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = Color.Blue,
+                        fontSize = 12.sp
+                    )
+                }
                 Text(
                     item.description,
                     maxLines = 1,
@@ -434,17 +457,18 @@ fun ListBox(item: PlaceApiOutput, command: () -> Unit){
             Icon(
                 painter = painterResource(R.drawable.ic_right),
                 contentDescription = null,
-                modifier = Modifier.fillMaxHeight().aspectRatio(1f).align(Alignment.CenterVertically)
-                )
+                modifier = Modifier
+                    .height(IntrinsicSize.Max)
+                    .aspectRatio(1f)
+                    .align(Alignment.CenterVertically)
+            )
         }
     }
 }
 
 
-
-
 private object PlaceClick {
-    var placeIndex : PlaceApiOutput? = null
+    var placeIndex: PlaceApiOutput? = null
 
     fun setIndex(new: PlaceApiOutput) {
         placeIndex = new
@@ -458,36 +482,32 @@ fun HalfWidthInDp(): Dp {
     return halfScreenWidth
 }
 
-object SearchTextSave{
+object SearchTextSave {
     var text = ""
 }
 
 @Composable
-fun Test(){
-    var placeDoc by remember { MyViewModel.getPlaceApiData() }
-    val place = remember { mutableStateOf(placeDoc!!.random())}
-    val color = arrayOf(Color.Blue, Color.Green)
-    var time = 0
+fun RecommandList(recomemnd: Boolean ,command: () -> Unit) {
+    val placeDoc = remember { MyViewModel.getPlaceApiData() }
+    RecommandCard(placeDoc.value, recomemnd, command)
+}
 
-    if(time > 9){
-        place.value = placeDoc!!.random()
-        time = 0
-    }
-    else {
+@Composable
+fun RecommandCard(placeDoc: List<PlaceApiOutput>?, recomemnd: Boolean,command: () -> Unit) {
+    val place = remember { mutableStateOf(placeDoc!!.random()) }
+    var time =0
+    Log.d("텟ㅌ", "ㅌㅌ")
+
+    timer(period = 1000L) {
         time++
-        thread { sleep(1000L) }
+        Log.d("테스트 타임", time.toString())
+        if(time > 9){
+            time = 0
+            cancel()
+            place.value = placeDoc!!.random()
+            Log.d("테스트", "테스트")
+        }
     }
 
-    Row{
-        if(time % 2 == 0){
-            Text("이런 곳은\n어떤가요?", fontSize = 25.sp, color = color[time%2])
-        }
-        else {
-            Text("이런 곳은\n어떤가요?", fontSize = 25.sp, color = color[time%2])
-        }
-        Column {
-            Text(place.value.title)
-            Text(place.value.description, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        }
-    }
+    ListBox(item = place.value, recomemnd = recomemnd) { command.invoke() }
 }
