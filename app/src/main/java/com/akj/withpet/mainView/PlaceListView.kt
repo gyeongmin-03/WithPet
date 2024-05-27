@@ -373,8 +373,8 @@ fun PlaceList(doc: List<PlaceApiOutput>, rememberListState: LazyListState, recom
                             choiceRegion2 in it.address
                 },
             ) { i, item ->
-                if (i % 10 == 0) {
-                    RecommandList(recomemnd, command)
+                if (recomemnd && (i % 10 == 0)) {
+                    RecommandList(command)
                 }
                 ListBox(item) { command.invoke() }
             }
@@ -487,13 +487,13 @@ object SearchTextSave {
 }
 
 @Composable
-fun RecommandList(recomemnd: Boolean ,command: () -> Unit) {
+fun RecommandList(command: () -> Unit) {
     val placeDoc = remember { MyViewModel.getPlaceApiData() }
-    RecommandCard(placeDoc.value, recomemnd, command)
+    RecommandCard(placeDoc.value, command)
 }
 
 @Composable
-fun RecommandCard(placeDoc: List<PlaceApiOutput>?, recomemnd: Boolean,command: () -> Unit) {
+fun RecommandCard(placeDoc: List<PlaceApiOutput>?,command: () -> Unit) {
     val place = remember { mutableStateOf(placeDoc!!.random()) }
     var time =0
     Log.d("텟ㅌ", "ㅌㅌ")
@@ -509,5 +509,5 @@ fun RecommandCard(placeDoc: List<PlaceApiOutput>?, recomemnd: Boolean,command: (
         }
     }
 
-    ListBox(item = place.value, recomemnd = recomemnd) { command.invoke() }
+    ListBox(item = place.value, recomemnd = true) { command.invoke() }
 }
