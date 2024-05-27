@@ -53,7 +53,7 @@ fun FavoriteView() {
     }
     else if(placeClicked.value){
         Box(modifier = Modifier.fillMaxSize()){
-            PlaceListView(myDB.myDAO().getPlaceList().map{it.place}, recomemnd = false)
+            PlaceListView(myDB.myDAO().getPlaceList().map{it.place}, recommend = false)
             closeIconButton(modifier = Modifier.align(Alignment.TopEnd), command = {placeClicked.value = false})
         }
     }

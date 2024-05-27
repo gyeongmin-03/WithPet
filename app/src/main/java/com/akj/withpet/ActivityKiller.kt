@@ -3,13 +3,10 @@ package com.akj.withpet
 import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavController
 
 
 // 뒤로 가기 두 번 눌렀을 때 앱 종료
@@ -32,9 +29,6 @@ fun BackPressExit() {
 
 @Composable
 fun BackPressMove(command : () -> Unit){
-    var backPressedState = remember { mutableStateOf(true) }
-
-
     BackHandler(enabled = true) {
         command.invoke()
     }

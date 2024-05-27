@@ -39,7 +39,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -89,13 +88,13 @@ import kotlin.concurrent.timer
 
 
 @Composable
-fun PlaceListView(doc: List<PlaceApiOutput>, recomemnd: Boolean) {
+fun PlaceListView(doc: List<PlaceApiOutput>, recommend: Boolean) {
     val placeListClicked = remember { mutableStateOf(false) }
     val rememberListState = rememberLazyListState()
     if (placeListClicked.value) {
         PlaceView(command = { placeListClicked.value = false })
     } else {
-        PlaceList(doc, rememberListState, recomemnd) { placeListClicked.value = true }
+        PlaceList(doc, rememberListState, recommend) { placeListClicked.value = true }
     }
 }
 
@@ -374,7 +373,7 @@ fun PlaceList(doc: List<PlaceApiOutput>, rememberListState: LazyListState, recom
                 },
             ) { i, item ->
                 if (recomemnd && (i % 10 == 0)) {
-                    RecommandList(command)
+                    RecommendList(command)
                 }
                 ListBox(item) { command.invoke() }
             }
@@ -487,25 +486,22 @@ object SearchTextSave {
 }
 
 @Composable
-fun RecommandList(command: () -> Unit) {
+fun RecommendList(command: () -> Unit) {
     val placeDoc = remember { MyViewModel.getPlaceApiData() }
-    RecommandCard(placeDoc.value, command)
+    RecommendCard(placeDoc.value, command)
 }
 
 @Composable
-fun RecommandCard(placeDoc: List<PlaceApiOutput>?,command: () -> Unit) {
+fun RecommendCard(placeDoc: List<PlaceApiOutput>?,command: () -> Unit) {
     val place = remember { mutableStateOf(placeDoc!!.random()) }
     var time =0
-    Log.d("텟ㅌ", "ㅌㅌ")
 
-    timer(period = 1000L) {
+    timer(period = 1000L, initialDelay = 1000L) {
         time++
-        Log.d("테스트 타임", time.toString())
         if(time > 9){
             time = 0
             cancel()
             place.value = placeDoc!!.random()
-            Log.d("테스트", "테스트")
         }
     }
 

@@ -9,11 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.akj.withpet.apiService.MyViewModel
 import com.akj.withpet.apiService.PlaceApiOutput
-import com.akj.withpet.mainView.TableRow
 import com.akj.withpet.ui.theme.WithPetTheme
 import com.opencsv.CSVReader
 import java.io.InputStreamReader
@@ -63,12 +61,4 @@ fun MainScreenView(){
             NavigationGraph(navController = navController)
         }
     }
-}
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    TableRow("test", "asssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
 }

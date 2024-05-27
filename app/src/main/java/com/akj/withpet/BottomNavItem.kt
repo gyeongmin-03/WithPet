@@ -99,7 +99,7 @@ fun NavigationGraph(navController: NavHostController){
             FavoriteView()
         }
         composable(BottomNavItem.List.screenRoute){
-            PlaceListView(placeDoc!!, recomemnd = true)
+            PlaceListView(placeDoc!!, recommend = true)
         }
     }
 }
