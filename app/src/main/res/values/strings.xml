@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WithPet</string>
+    <string name="app_name">동반</string>
     <string name="text_pet_favorite">Favorite</string>
     <string name="text_pet_card">Pet</string>
     <string name="text_pet_list">Place</string>
